@@ -5,8 +5,9 @@ var tile_definitions = {
 	0: { "char": ".", "color": Color("purple") },
 	1: { "char": "#", "color": Color("blue_violet") },
 	2: { "char": ">", "color": Color("gold") },
-	5: { "char": "!", "color": Color("deep_sky_blue") },
-	6: { "char": "&", "color": Color("red") }
+	5: { "char": "+", "color": Color("deep_sky_blue") },
+	6: { "char": "&", "color": Color("sea_green") },
+	7: { "char": "*", "color": Color("yellow") }
 }
 
 var actor_definitions = {
@@ -138,6 +139,17 @@ func try_move(dx, dy):
 			update_ui()
 			map_data[target_x][target_y] = 0
 			tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
+		if target_tile_type == 7:
+			GameState.has_light_source = true
+			GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
+			GameState.light_durability = GameState.max_light_durability
+			log_message("You pick up a flashlight and turn it on.", Color.YELLOW)
+			$Timer.wait_time = 3.0
+			update_ui()
+			map_data[target_x][target_y] = 0
+			tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
+
+
 		map_data[player["y"]][player["x"]] = 0
 		player["x"] = target_x
 		player["y"] = target_y
@@ -152,6 +164,23 @@ func try_move(dx, dy):
 			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
 			get_tree().reload_current_scene()
 		
+	if GameState.has_light_source and (dx != 0 or dy != 0):
+		GameState.light_durability -= 1
+		if GameState.light_durability <= 0:
+			GameState.has_light_source = false
+			log_message("Your flashlight sputters and dies!", Color.RED)
+		update_ui()
+	
+	if GameState.has_light_source:
+		var durability_percent = float(GameState.light_durability) / float(GameState.max_light_durability)
+		if durability_percent > 0.18:
+			$Timer.wait_time = 3.0
+		else:
+			var failing_percent = durability_percent / 0.18
+			$Timer.wait_time = 0.2 + (failing_percent * 1.3)
+	else: 
+		$Timer.wait_time = 3.0
+	
 	update_fog()
 
 
@@ -337,6 +366,18 @@ func spawn_actors_and_items():
 					map_data[py][px] = 6
 					hp_placed = true
 
+	var flashlight_chance = 100
+	if GameState.level > 1:
+		flashlight_chance = max(25, 100 - ((GameState.level - 1) * 8))
+	if randi_range(1, 100) <= flashlight_chance:
+		var flashlight_placed = false
+		while not flashlight_placed:
+			var px = randi_range(1, map_data[0].size() - 2)
+			var py = randi_range(1, map_data.size() - 2)
+			if map_data[py][px] == 0:
+				map_data[py][px] = 7
+				flashlight_placed = true
+
 
 func create_map_tiles():
 	fog_map.clear()
@@ -396,13 +437,18 @@ func create_actor_labels():
 
 
 func update_fog():
-	# Part 1: Update fog data
+	# --- PART 1: Update the fog_map data ---
+	# First, set all currently 'visible' (2) tiles back to 'known' (1)
 	for y in range(fog_map.size()):
 		for x in range(fog_map[y].size()):
 			if fog_map[y][x] == 2:
 				fog_map[y][x] = 1
 
-	var vision_radius = 5
+	# Then, calculate the new visible area based on whether we have a light
+	var vision_radius = 2.5 # Default small radius for dark mode
+	if GameState.has_light_source:
+		vision_radius = 5 # Larger radius if we have a light
+	
 	var player_pos = Vector2(player["x"], player["y"])
 	for y in range(player_pos.y - vision_radius, player_pos.y + vision_radius + 1):
 		for x in range(player_pos.x - vision_radius, player_pos.x + vision_radius + 1):
@@ -411,33 +457,65 @@ func update_fog():
 				if player_pos.distance_to(tile_pos) < vision_radius:
 					fog_map[y][x] = 2
 
-	# Part 2: Update map tile visuals
+	# --- PART 2: Update the visuals ---
+	# Update map tile visuals
 	for y in range(map_data.size()):
 		for x in range(map_data[y].size()):
 			var fog_state = fog_map[y][x]
 			var tile_node = tile_nodes[y][x]
-			if fog_state == 2:
+			if fog_state == 2: # Visible
 				var tile_type = map_data[y][x]
 				if tile_definitions.has(tile_type):
-					tile_node.modulate = tile_definitions[tile_type]["color"]
-			elif fog_state == 1:
+					var color = tile_definitions[tile_type]["color"]
+					if not GameState.has_light_source:
+						# In dark mode, desaturate the color
+						var brightness = color.v / 2.5
+						tile_node.modulate = Color(brightness, brightness, brightness)
+					else:
+						# With a light, show full color
+						tile_node.modulate = color
+			elif fog_state == 1: # Known
 				tile_node.modulate = Color(0.2, 0.2, 0.2)
-			else:
+			else: # Hidden
 				tile_node.modulate = Color(0, 0, 0)
 
 	# Part 3: Update actor visuals
 	for actor in actors:
 		var fog_state = fog_map[actor["y"]][actor["x"]]
-		if fog_state == 2:
-			actor["label"].visible = true
+		var actor_pos = Vector2(actor["x"], actor["y"])
+		
+		if fog_state == 2: # Actor is in a visible tile
+			if not GameState.has_light_source and actor != player:
+				# In dark mode, only see aliens if they are right next to you
+				if player_pos.distance_to(actor_pos) <= 1.5:
+					actor["label"].visible = true
+				else:
+					actor["label"].visible = false
+			else:
+				# With a light, or if it's the player, they are visible
+				actor["label"].visible = true
+			
 			actor["label"].text = actor["char"]
 			actor["label"].modulate = actor["color"]
-		elif fog_state == 1:
-			if actor["hp"] <= 0:
+		elif fog_state == 1: # In a known area
+			if actor["hp"] <= 0: # If it's a corpse
 				actor["label"].visible = true
 				actor["label"].text = actor["char"]
 				actor["label"].modulate = Color(0.2, 0.2, 0.2)
-			else:
+			else: # It's a living enemy, hide it
 				actor["label"].visible = false
-		else:
+		else: # In a hidden area
 			actor["label"].visible = false
+
+
+func _on_timer_timeout():
+	if GameState.has_light_source:
+		var durability_percent = float(GameState.light_durability) / float(GameState.max_light_durability)
+		var flicker_chance = 20 + (1.0 - durability_percent) * 60
+		if randi_range(1, 100) <= flicker_chance:
+			var flicker_duration = 0.2 + (1.0 - durability_percent) * 0.5
+			GameState.has_light_source = false
+			update_fog()
+			await get_tree().create_timer(flicker_duration).timeout
+			GameState.has_light_source = true
+			update_fog()
