@@ -1,0 +1,11 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Godot-specific ignores
+addons/
+export_presets.cfg
+*.pck
+*.import
+
+# General ignores
+.DS_Store
