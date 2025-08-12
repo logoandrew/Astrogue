@@ -1,0 +1,184 @@
+[gd_scene load_steps=7 format=3 uid="uid://l067fnf35t7p"]
+
+[ext_resource type="Script" uid="uid://6r6ywfsid7cp" path="res://TitleScreen.gd" id="1_fnlyl"]
+[ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://fonts/SpaceMono-Bold.ttf" id="2_2k3je"]
+[ext_resource type="FontFile" uid="uid://cehrteq34p0vs" path="res://fonts/SpaceMono-Regular.ttf" id="3_skwql"]
+[ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://fonts/SpaceMono-Italic.ttf" id="4_6iguo"]
+[ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://fonts/SpaceMono-BoldItalic.ttf" id="5_g3l3g"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fnlyl"]
+bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
+expand_margin_left = 20.0
+expand_margin_top = 20.0
+expand_margin_right = 20.0
+expand_margin_bottom = 20.0
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_fnlyl")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -44.5
+offset_right = 44.5
+offset_bottom = 23.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_2k3je")
+theme_override_font_sizes/font_size = 48
+text = "ASTROGUE!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -55.0
+offset_top = -68.0
+offset_right = 55.0
+offset_bottom = 68.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="StartGame" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_skwql")
+text = "Start Game"
+
+[node name="Instructions" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_skwql")
+text = "Instructions"
+
+[node name="HighScoreList" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_skwql")
+text = "High Scores"
+
+[node name="InstructionsPanel" type="Panel" parent="."]
+visible = false
+custom_minimum_size = Vector2(450, 320)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_fnlyl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InstructionsPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="InstructionsPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 300)
+layout_mode = 2
+theme_override_fonts/normal_font = ExtResource("3_skwql")
+theme_override_fonts/mono_font = ExtResource("3_skwql")
+theme_override_fonts/italics_font = ExtResource("4_6iguo")
+theme_override_fonts/bold_italics_font = ExtResource("5_g3l3g")
+theme_override_fonts/bold_font = ExtResource("2_2k3je")
+theme_override_font_sizes/bold_italics_font_size = 13
+theme_override_font_sizes/italics_font_size = 13
+theme_override_font_sizes/mono_font_size = 13
+theme_override_font_sizes/normal_font_size = 13
+theme_override_font_sizes/bold_font_size = 13
+bbcode_enabled = true
+text = "[b]Directive // OPERATION: ASTROGUE // Top Secret[/b]
+
+Your objective is to serve as the sole infiltrator for the Astrogue unit. You will descend into the primary hive structure on LE-415, neutralizing all hostile xenoforms in your path to clear the way for the science team that follows. You will not be extracted.
+
+SURVIVAL PROTOCOL:
+
+TERRAIN: The hive walls [b][#][/b] are impenetrable. Navigate the open floor corridors [b][.][/b]. Your suit's tactical display (bottom right) will automatically map all explored areas.
+
+MOVEMENT [b][UP, DOWN, LEFT, RIGHT][/b]: Standard suit locomotion. Proceed with extreme caution. Every step in the dark could be your last.
+
+HOSTILES [b][A][/b]: Your goal is extermination. Your suit is not rated for sustained combat; expect missed attacks. To engage, attempt to move into an occupied tile.
+
+ARMOR SCRAPS [b][&][/b]: The previous expeditionary team was a total loss. Scavenge reinforced plating from their remains to permanently increase your suit's resilience.
+
+SYNTH-BANDAGES [b][+][/b]: Makeshift medical supplies. Use them to patch suit breaches and restore system integrity.
+
+ILLUMINATION:
+
+Your suit is equipped with a Limited Illumination Transducer (LIT) unit. This device utilizes scavenged and unstable crystal fragments [b][*][/b] to emit light.
+
+Be warned: The crystals degrade with use. The LIT unit will flicker and fail as the crystal drains. Find new crystals to replenish your light.
+
+THE HIVE:
+
+Its depths are unknown. Each level you descend [b][>][/b] will be more dangerous. There is no hope here, only the mission.
+
+Make your sacrifice count. Die well."
+
+[node name="Back" type="Button" parent="InstructionsPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_skwql")
+text = "Back"
+
+[node name="HighScoresPanel" type="Panel" parent="."]
+visible = false
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_fnlyl")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HighScoresPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="HighScoresPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_2k3je")
+text = "High Scores:"
+
+[node name="ScoreListLabel" type="Label" parent="HighScoresPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_skwql")
+
+[node name="Back" type="Button" parent="HighScoresPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_skwql")
+text = "Back"
+
+[connection signal="pressed" from="VBoxContainer/StartGame" to="." method="_on_start_game_pressed"]
+[connection signal="pressed" from="VBoxContainer/Instructions" to="." method="_on_instructions_pressed"]
+[connection signal="pressed" from="VBoxContainer/HighScoreList" to="." method="_on_high_score_list_pressed"]
+[connection signal="pressed" from="InstructionsPanel/VBoxContainer/Back" to="." method="_on_back_pressed"]
+[connection signal="pressed" from="HighScoresPanel/VBoxContainer/Back" to="." method="_on_back_pressed"]

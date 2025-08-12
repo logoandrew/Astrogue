@@ -26,6 +26,7 @@ var message_history = []
 var is_player_turn = true
 var light_dur_init = GameState.light_durability
 var max_light_dur_init = GameState.max_light_durability
+var game_is_paused = false
 
 # --- Godot Functions ---
 func _ready():
@@ -64,7 +65,11 @@ func _process(delta):
 		get_tree().reload_current_scene()
 		return
 	
-	if not get_tree().paused:
+	if Input.is_action_just_pressed("ui_cancel"):
+		game_is_paused = not game_is_paused
+		$CanvasLayer/QuitDialogue.visible = game_is_paused
+	
+	if not get_tree().paused and not game_is_paused:
 		if is_player_turn:
 			if Input.is_action_just_pressed("ui_right"):
 				try_move(1, 0)
@@ -159,7 +164,7 @@ func try_move(dx, dy):
 			GameState.has_light_source = true
 			GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
 			GameState.light_durability = GameState.max_light_durability
-			log_message("You pick up a flashlight and turn it on.", Color.YELLOW)
+			log_message("You pick up a crystal and power your LIT unit.", Color.YELLOW)
 			$Timer.wait_time = 3.0
 			update_ui()
 			map_data[target_x][target_y] = 0
@@ -186,7 +191,7 @@ func try_move(dx, dy):
 		GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
 			GameState.has_light_source = false
-			log_message("Your flashlight sputters and dies!", Color.RED)
+			log_message("Your LIT unit sputters and dies!", Color.RED)
 		update_ui()
 	
 	if GameState.has_light_source:
@@ -259,15 +264,18 @@ func kill_actor(actor):
 func player_death():
 	log_message("You have been defeated!", Color.DARK_RED)
 	is_player_turn = false
-	get_tree().paused = true
 	
-	if GameState.score > GameState.high_score:
-		GameState.high_score = GameState.score
-		GameState.save_high_score()
-		log_message("New High Score: " + str(GameState.high_score), Color.GOLD)
-	
-	log_message("--- GAME OVER ---", Color.WHITE)
-	log_message("Press [R] to restart", Color.GRAY)
+	if is_high_score():
+		$CanvasLayer/EnterHighScorePanel.show()
+	else:
+		get_tree().paused = true
+		if GameState.score > GameState.high_score:
+			GameState.high_score = GameState.score
+			GameState.save_high_score()
+			log_message("New High Score: " + str(GameState.high_score), Color.GOLD)
+		
+		log_message("--- GAME OVER ---", Color.WHITE)
+		log_message("Press [R] to restart", Color.GRAY)
 
 
 func shake_camera():
@@ -280,7 +288,10 @@ func shake_camera():
 
 func update_ui():
 	var health_label = $CanvasLayer/HealthLabel
-	health_label.text = "HP: " + str(player["hp"]) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(GameState.high_score) + "  |  Level: " + str(GameState.level)# + "  |  FL: " + str(GameState.light_durability) + "/" + str(GameState.max_light_durability)
+	var top_score = 0
+	if not GameState.high_scores.is_empty():
+		top_score = GameState.high_scores[0]["score"]
+	health_label.text = "HP: " + str(player["hp"]) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(top_score) + "  |  Level: " + str(GameState.level)# + "  |  FL: " + str(GameState.light_durability) + "/" + str(GameState.max_light_durability)
 	
 	var health_bar = $CanvasLayer/HealthBar
 	health_bar.max_value = GameState.max_player_hp
@@ -547,3 +558,44 @@ func _on_timer_timeout():
 			await get_tree().create_timer(flicker_duration).timeout
 			GameState.has_light_source = true
 			update_fog()
+
+
+func is_high_score():
+	if GameState.high_scores.size() < 10:
+		return true
+	var lowest_score = GameState.high_scores[-1]["score"]
+	if GameState.score > lowest_score:
+		return true
+	return false
+
+
+func _on_submit_hs_pressed() -> void:
+	var line_edit = $CanvasLayer/EnterHighScorePanel/VBoxContainer/LineEdit
+	var player_tag = line_edit.text.to_upper()
+	if player_tag.length() > 3:
+		player_tag = player_tag.substr(0, 3)
+	var new_score_entry = { "tag": player_tag, "score": GameState.score }
+	GameState.high_scores.append(new_score_entry)
+	GameState.high_scores.sort_custom(func(a, b): return a.score > b.score)
+	if GameState.high_scores.size() > 10:
+		GameState.high_scores.resize(10)
+	GameState.save_high_scores()
+	$CanvasLayer/EnterHighScorePanel.hide()
+	get_tree().paused = true
+	log_message("--- GAME OVER ---", Color.WHITE)
+	log_message("Press [R] to restart", Color.GRAY)
+
+
+func _on_yes_quit_pressed() -> void:
+	game_is_paused = false
+	GameState.score = 0
+	GameState.level = 1
+	GameState.player_hp = GameState.max_player_hp
+	GameState.has_light_source = false
+	GameState.light_durability = 0
+	get_tree().change_scene_to_file("res://TitleScreen.tscn")
+
+
+func _on_no_quit_pressed() -> void:
+	game_is_paused = false
+	$CanvasLayer/QuitDialogue.hide()

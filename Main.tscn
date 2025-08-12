@@ -1,10 +1,20 @@
-[gd_scene load_steps=4 format=3 uid="uid://japyvpunvb26"]
+[gd_scene load_steps=10 format=3 uid="uid://japyvpunvb26"]
 
 [ext_resource type="Script" uid="uid://fugettr3tcxt" path="res://main.gd" id="1_glv2v"]
+[ext_resource type="FontFile" uid="uid://cehrteq34p0vs" path="res://fonts/SpaceMono-Regular.ttf" id="2_r0du0"]
 [ext_resource type="Script" uid="uid://momyt4c4d30h" path="res://MiniMapDisplay.gd" id="2_uu6xs"]
+[ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://fonts/SpaceMono-Italic.ttf" id="3_3dxm6"]
+[ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://fonts/SpaceMono-BoldItalic.ttf" id="4_lgr22"]
+[ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://fonts/SpaceMono-Bold.ttf" id="5_trn2v"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glv2v"]
 bg_color = Color(0.129412, 0.713726, 0.243137, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uu6xs"]
+bg_color = Color(0.0605303, 0.0605303, 0.0605303, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0du0"]
+bg_color = Color(0.0497766, 0.0497767, 0.0497766, 1)
 
 [node name="Main" type="Node2D"]
 process_mode = 3
@@ -21,6 +31,8 @@ offset_top = 25.0
 offset_right = 0.5
 offset_bottom = 48.0
 grow_horizontal = 2
+theme_override_fonts/font = ExtResource("2_r0du0")
+theme_override_font_sizes/font_size = 13
 horizontal_alignment = 1
 
 [node name="MessageLog" type="RichTextLabel" parent="CanvasLayer"]
@@ -31,6 +43,16 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 0
+theme_override_fonts/normal_font = ExtResource("2_r0du0")
+theme_override_fonts/mono_font = ExtResource("2_r0du0")
+theme_override_fonts/italics_font = ExtResource("3_3dxm6")
+theme_override_fonts/bold_italics_font = ExtResource("4_lgr22")
+theme_override_fonts/bold_font = ExtResource("5_trn2v")
+theme_override_font_sizes/bold_italics_font_size = 14
+theme_override_font_sizes/italics_font_size = 14
+theme_override_font_sizes/mono_font_size = 14
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 14
 bbcode_enabled = true
 scroll_following = true
 
@@ -60,8 +82,105 @@ color = Color(0.0943044, 0.0943044, 0.0943043, 1)
 [node name="MiniMapDisplay" type="Node2D" parent="CanvasLayer/MiniMapBG"]
 script = ExtResource("2_uu6xs")
 
+[node name="EnterHighScorePanel" type="Panel" parent="CanvasLayer"]
+visible = false
+custom_minimum_size = Vector2(300, 200)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_uu6xs")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/EnterHighScorePanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -63.0
+offset_top = -46.5
+offset_right = 63.0
+offset_bottom = 46.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="CanvasLayer/EnterHighScorePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_trn2v")
+text = "New High Score!"
+horizontal_alignment = 1
+
+[node name="LineEdit" type="LineEdit" parent="CanvasLayer/EnterHighScorePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_r0du0")
+placeholder_text = "Enter your initials..."
+alignment = 1
+max_length = 3
+caret_blink = true
+
+[node name="SubmitButton" type="Button" parent="CanvasLayer/EnterHighScorePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_r0du0")
+text = "Submit"
+
+[node name="QuitDialogue" type="Panel" parent="CanvasLayer"]
+visible = false
+custom_minimum_size = Vector2(300, 100)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_r0du0")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/QuitDialogue"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Label" type="Label" parent="CanvasLayer/QuitDialogue/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("5_trn2v")
+text = "Quit to main menu?"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/QuitDialogue/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="YesBtn" type="Button" parent="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_r0du0")
+text = "Yes"
+
+[node name="NoBtn" type="Button" parent="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_r0du0")
+text = "No"
+
 [node name="Timer" type="Timer" parent="."]
 wait_time = 3.0
 autostart = true
 
+[connection signal="pressed" from="CanvasLayer/EnterHighScorePanel/VBoxContainer/SubmitButton" to="." method="_on_submit_hs_pressed"]
+[connection signal="pressed" from="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer/YesBtn" to="." method="_on_yes_quit_pressed"]
+[connection signal="pressed" from="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer/NoBtn" to="." method="_on_no_quit_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
