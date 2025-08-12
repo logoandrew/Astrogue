@@ -22,7 +22,10 @@ var tile_size = 24
 var fog_map = []
 var tile_nodes = []
 var map_data = []
+var message_history = []
 var is_player_turn = true
+var light_dur_init = GameState.light_durability
+var max_light_dur_init = GameState.max_light_durability
 
 # --- Godot Functions ---
 func _ready():
@@ -54,6 +57,9 @@ func _process(delta):
 		GameState.score = 0
 		GameState.level = 1
 		GameState.player_hp = GameState.max_player_hp
+		GameState.has_light_source = true
+		GameState.light_durability = light_dur_init
+		GameState.max_light_durability = max_light_dur_init
 		get_tree().paused = false
 		get_tree().reload_current_scene()
 		return
@@ -94,6 +100,16 @@ func _draw():
 		draw_line(Vector2(-grid_range * tile_size, y), Vector2(grid_range * tile_size, y), Color(0.1, 0.1, 0.1))
 
 
+func is_tile_open(x, y):
+	for j in range(y - 1, y + 2):
+		for i in range (x - 1, x + 2):
+			if j < 0 or j >= map_data.size() or i < 0 or i >= map_data[0].size():
+				return false
+			if map_data[j][i] == 1:
+				return false
+	return true
+
+
 # --- Custom Game Logic Functions ---
 func try_move(dx, dy):
 	var target_x = player["x"] + dx
@@ -120,7 +136,7 @@ func try_move(dx, dy):
 	elif target_tile_type != 1:
 		if target_tile_type == 5:
 			if player["hp"] < GameState.max_player_hp:
-				player["hp"] += 4
+				player["hp"] += 5
 				player["hp"] = min(player["hp"], GameState.max_player_hp)
 				GameState.player_hp = player["hp"]
 				log_message("You heal yourself", Color.DEEP_SKY_BLUE)
@@ -161,6 +177,8 @@ func try_move(dx, dy):
 		if target_tile_type == 2:
 			GameState.score += 38 + (GameState.level * 2)
 			GameState.level += 1
+			if GameState.light_durability > 0:
+				GameState.has_light_source = true
 			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
 			get_tree().reload_current_scene()
 		
@@ -186,7 +204,7 @@ func try_move(dx, dy):
 
 func enemy_take_turn(actor):
 	var can_see_player = false
-	var vision_radius = 5
+	var vision_radius = 6
 	var actor_pos = Vector2(actor["x"], actor["y"])
 	var player_pos = Vector2(player["x"], player["y"])
 	
@@ -262,7 +280,7 @@ func shake_camera():
 
 func update_ui():
 	var health_label = $CanvasLayer/HealthLabel
-	health_label.text = "HP: " + str(player["hp"]) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(GameState.high_score) + "  |  Level: " + str(GameState.level)
+	health_label.text = "HP: " + str(player["hp"]) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(GameState.high_score) + "  |  Level: " + str(GameState.level)# + "  |  FL: " + str(GameState.light_durability) + "/" + str(GameState.max_light_durability)
 	
 	var health_bar = $CanvasLayer/HealthBar
 	health_bar.max_value = GameState.max_player_hp
@@ -270,10 +288,20 @@ func update_ui():
 
 
 func log_message(message, color = Color.WHITE):
+	message_history.append({ "text": message, "color": color })
+	if message_history.size() > 10:
+		message_history.pop_front()
 	var message_log = $CanvasLayer/MessageLog
-	message_log.bbcode_enabled = true
-	message_log.scroll_following = true
-	message_log.append_text("[color=" + color.to_html() + "]" + message + "[/color]\n")
+	message_log.clear()
+	for i in range(message_history.size()):
+		var msg_data = message_history[i]
+		var text = msg_data["text"]
+		var text_color = msg_data["color"]
+		if i < message_history.size() - 1:
+			text_color.a = 0.5
+		message_log.bbcode_enabled = true
+		message_log.scroll_following = true
+		message_log.append_text("[color=" + text_color.to_html(true) + "]" + text + "[/color]\n")
 
 
 func generate_map():
@@ -318,7 +346,7 @@ func spawn_actors_and_items():
 			player["x"] = px
 			player["y"] = py
 			actors.append(player)
-			map_data[py][px] = 4
+			#map_data[py][px] = 4
 			player_placed = true
 
 	var enemies_to_place = 2 + GameState.level
@@ -333,14 +361,14 @@ func spawn_actors_and_items():
 					"x": ex, "y": ey, "hp": enemy_def["hp"],
 					"char": enemy_def["char"], "color": enemy_def["color"], "accuracy": enemy_def["accuracy"]
 				})
-				map_data[ey][ex] = 3
+				#map_data[ey][ex] = 3
 				enemy_placed = true
 	
 	var staircase_placed = false
 	while not staircase_placed:
 		var sx = randi_range(1, map_data[0].size() - 2)
 		var sy = randi_range(1, map_data.size() - 2)
-		if map_data[sy][sx] == 0:
+		if map_data[sy][sx] == 0 and is_tile_open(sx, sy):
 			map_data[sy][sx] = 2
 			staircase_placed = true
 	
@@ -350,7 +378,7 @@ func spawn_actors_and_items():
 		while not potion_placed:
 			var px = randi_range(1, map_data[0].size() - 2)
 			var py = randi_range(1, map_data.size() - 2)
-			if map_data[py][px] == 0:
+			if map_data[py][px] == 0 and is_tile_open(px, py):
 				map_data[py][px] = 5
 				potion_placed = true
 
@@ -513,7 +541,7 @@ func _on_timer_timeout():
 		var durability_percent = float(GameState.light_durability) / float(GameState.max_light_durability)
 		var flicker_chance = 20 + (1.0 - durability_percent) * 60
 		if randi_range(1, 100) <= flicker_chance:
-			var flicker_duration = 0.2 + (1.0 - durability_percent) * 0.5
+			var flicker_duration = 0.15 + (1.0 - durability_percent) * 0.5
 			GameState.has_light_source = false
 			update_fog()
 			await get_tree().create_timer(flicker_duration).timeout

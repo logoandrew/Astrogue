@@ -23,7 +23,7 @@ GameState="*res://GameState.gd"
 
 window/size/viewport_width=2000
 window/size/viewport_height=1200
-window/stretch/scale=2.0
+window/stretch/scale=2.5
 
 [input]
 
