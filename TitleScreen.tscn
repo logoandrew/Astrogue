@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://6r6ywfsid7cp" path="res://TitleScreen.gd" id="1_fnlyl"]
 [ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://fonts/SpaceMono-Bold.ttf" id="2_2k3je"]
-[ext_resource type="FontFile" uid="uid://cehrteq34p0vs" path="res://fonts/SpaceMono-Regular.ttf" id="3_skwql"]
+[ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://fonts/ShareTechMono-Regular.ttf" id="2_skwql"]
 [ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://fonts/SpaceMono-Italic.ttf" id="4_6iguo"]
 [ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://fonts/SpaceMono-BoldItalic.ttf" id="5_g3l3g"]
 
@@ -12,6 +12,8 @@ expand_margin_left = 20.0
 expand_margin_top = 20.0
 expand_margin_right = 20.0
 expand_margin_bottom = 20.0
+shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
+shadow_size = 35
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -31,7 +33,7 @@ offset_left = -44.5
 offset_right = 44.5
 offset_bottom = 23.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("2_2k3je")
+theme_override_fonts/font = ExtResource("2_skwql")
 theme_override_font_sizes/font_size = 48
 text = "ASTROGUE!"
 horizontal_alignment = 1
@@ -53,17 +55,17 @@ grow_vertical = 2
 
 [node name="StartGame" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_skwql")
+theme_override_fonts/font = ExtResource("2_skwql")
 text = "Start Game"
 
 [node name="Instructions" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_skwql")
+theme_override_fonts/font = ExtResource("2_skwql")
 text = "Instructions"
 
 [node name="HighScoreList" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_skwql")
+theme_override_fonts/font = ExtResource("2_skwql")
 text = "High Scores"
 
 [node name="InstructionsPanel" type="Panel" parent="."]
@@ -94,15 +96,16 @@ grow_vertical = 2
 [node name="RichTextLabel" type="RichTextLabel" parent="InstructionsPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
-theme_override_fonts/normal_font = ExtResource("3_skwql")
-theme_override_fonts/mono_font = ExtResource("3_skwql")
+theme_override_constants/line_separation = 5
+theme_override_fonts/normal_font = ExtResource("2_skwql")
+theme_override_fonts/mono_font = ExtResource("2_skwql")
 theme_override_fonts/italics_font = ExtResource("4_6iguo")
 theme_override_fonts/bold_italics_font = ExtResource("5_g3l3g")
 theme_override_fonts/bold_font = ExtResource("2_2k3je")
 theme_override_font_sizes/bold_italics_font_size = 13
 theme_override_font_sizes/italics_font_size = 13
-theme_override_font_sizes/mono_font_size = 13
-theme_override_font_sizes/normal_font_size = 13
+theme_override_font_sizes/mono_font_size = 14
+theme_override_font_sizes/normal_font_size = 14
 theme_override_font_sizes/bold_font_size = 13
 bbcode_enabled = true
 text = "[b]Directive // OPERATION: ASTROGUE // Top Secret[/b]
@@ -113,7 +116,7 @@ SURVIVAL PROTOCOL:
 
 TERRAIN: The hive walls [b][#][/b] are impenetrable. Navigate the open floor corridors [b][.][/b]. Your suit's tactical display (bottom right) will automatically map all explored areas.
 
-MOVEMENT [b][UP, DOWN, LEFT, RIGHT][/b]: Standard suit locomotion. Proceed with extreme caution. Every step in the dark could be your last.
+MOVEMENT [b][UP, DOWN, LEFT, RIGHT][/b]: Standard suit movement. Proceed with extreme caution. Every step in the dark could be your last.
 
 HOSTILES [b][A][/b]: Your goal is extermination. Your suit is not rated for sustained combat; expect missed attacks. To engage, attempt to move into an occupied tile.
 
@@ -135,12 +138,12 @@ Make your sacrifice count. Die well."
 
 [node name="Back" type="Button" parent="InstructionsPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_skwql")
+theme_override_fonts/font = ExtResource("2_skwql")
 text = "Back"
 
 [node name="HighScoresPanel" type="Panel" parent="."]
 visible = false
-custom_minimum_size = Vector2(300, 300)
+custom_minimum_size = Vector2(300, 320)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -160,21 +163,31 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Label" type="Label" parent="HighScoresPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_2k3je")
+theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_font_sizes/font_size = 20
 text = "High Scores:"
+horizontal_alignment = 1
 
-[node name="ScoreListLabel" type="Label" parent="HighScoresPanel/VBoxContainer"]
+[node name="ScoreListLabel" type="RichTextLabel" parent="HighScoresPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_skwql")
+theme_override_fonts/normal_font = ExtResource("2_skwql")
+theme_override_fonts/mono_font = ExtResource("2_skwql")
+theme_override_fonts/italics_font = ExtResource("4_6iguo")
+theme_override_fonts/bold_italics_font = ExtResource("5_g3l3g")
+theme_override_fonts/bold_font = ExtResource("2_2k3je")
+horizontal_alignment = 1
 
 [node name="Back" type="Button" parent="HighScoresPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("3_skwql")
+theme_override_fonts/font = ExtResource("2_skwql")
 text = "Back"
 
 [connection signal="pressed" from="VBoxContainer/StartGame" to="." method="_on_start_game_pressed"]

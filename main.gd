@@ -27,6 +27,7 @@ var is_player_turn = true
 var light_dur_init = GameState.light_durability
 var max_light_dur_init = GameState.max_light_durability
 var game_is_paused = false
+var tile_font = preload("res://fonts/SpaceMono-Regular.ttf")
 
 # --- Godot Functions ---
 func _ready():
@@ -57,6 +58,7 @@ func _process(delta):
 		# Reset game state for a new run
 		GameState.score = 0
 		GameState.level = 1
+		GameState.max_player_hp = 10
 		GameState.player_hp = GameState.max_player_hp
 		GameState.has_light_source = true
 		GameState.light_durability = light_dur_init
@@ -144,19 +146,19 @@ func try_move(dx, dy):
 				player["hp"] += 5
 				player["hp"] = min(player["hp"], GameState.max_player_hp)
 				GameState.player_hp = player["hp"]
-				log_message("You heal yourself", Color.DEEP_SKY_BLUE)
+				log_message("You repair your spacesuit.", Color.DEEP_SKY_BLUE)
 				update_ui()
 				map_data[target_x][target_y] = 0
 				tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
 			else:
-				log_message("You don't need health.", Color.GRAY)
+				log_message("You don't need repairs.", Color.GRAY)
 				update_fog()
 				return
 		if target_tile_type == 6:
 			GameState.max_player_hp += 1
 			player["hp"] += 1
 			player["hp"] = min(player["hp"], GameState.max_player_hp)
-			log_message("You found a piece of armor", Color.SEA_GREEN)
+			log_message("You scavenge a piece of armor", Color.SEA_GREEN)
 			update_ui()
 			map_data[target_x][target_y] = 0
 			tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
@@ -184,14 +186,15 @@ func try_move(dx, dy):
 			GameState.level += 1
 			if GameState.light_durability > 0:
 				GameState.has_light_source = true
-			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
 			get_tree().reload_current_scene()
+			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
+
 		
 	if GameState.has_light_source and (dx != 0 or dy != 0):
 		GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
 			GameState.has_light_source = false
-			log_message("Your LIT unit sputters and dies!", Color.RED)
+			log_message("Your LIT unit flickers and goes dark!", Color.RED)
 		update_ui()
 	
 	if GameState.has_light_source:
@@ -428,6 +431,7 @@ func create_map_tiles():
 			fog_row.append(0)
 			var tile_type = map_data[y][x]
 			var new_tile = Label.new()
+			new_tile.add_theme_font_override("font", tile_font)
 			if tile_definitions.has(tile_type):
 				var tile_def = tile_definitions[tile_type]
 				new_tile.text = tile_def["char"]
@@ -447,6 +451,7 @@ func create_map_tiles():
 func create_actor_labels():
 	for actor in actors:
 		var new_label = Label.new()
+		new_label.add_theme_font_override("font", tile_font)
 		new_label.text = actor["char"]
 		new_label.modulate = actor["color"]
 		if actor == player:
@@ -574,6 +579,8 @@ func _on_submit_hs_pressed() -> void:
 	var player_tag = line_edit.text.to_upper()
 	if player_tag.length() > 3:
 		player_tag = player_tag.substr(0, 3)
+	while player_tag.length() < 3:
+		player_tag += " "
 	var new_score_entry = { "tag": player_tag, "score": GameState.score }
 	GameState.high_scores.append(new_score_entry)
 	GameState.high_scores.sort_custom(func(a, b): return a.score > b.score)
@@ -588,11 +595,14 @@ func _on_submit_hs_pressed() -> void:
 
 func _on_yes_quit_pressed() -> void:
 	game_is_paused = false
+	get_tree().paused = false
 	GameState.score = 0
 	GameState.level = 1
+	GameState.max_player_hp = 10
 	GameState.player_hp = GameState.max_player_hp
-	GameState.has_light_source = false
-	GameState.light_durability = 0
+	GameState.has_light_source = true
+	GameState.light_durability = light_dur_init
+	GameState.max_light_durability = max_light_dur_init
 	get_tree().change_scene_to_file("res://TitleScreen.tscn")
 
 
