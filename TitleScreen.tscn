@@ -96,7 +96,7 @@ grow_vertical = 2
 [node name="RichTextLabel" type="RichTextLabel" parent="InstructionsPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
-theme_override_constants/line_separation = 5
+theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("2_skwql")
 theme_override_fonts/mono_font = ExtResource("2_skwql")
 theme_override_fonts/italics_font = ExtResource("4_6iguo")
@@ -110,7 +110,7 @@ theme_override_font_sizes/bold_font_size = 13
 bbcode_enabled = true
 text = "[b]Directive // OPERATION: ASTROGUE // Top Secret[/b]
 
-Your objective is to serve as the sole infiltrator for the Astrogue unit. You will descend into the primary hive structure on LE-415, neutralizing all hostile xenoforms in your path to clear the way for the science team that follows. You will not be extracted.
+Your objective is to serve as the sole infiltrator for the Astrogue unit. You will descend into the primary hive structure on LE415-Prime, neutralizing all hostile xenoforms in your path to clear the way for the research unit that will follow. You will not be extracted.
 
 SURVIVAL PROTOCOL:
 
@@ -126,9 +126,9 @@ SYNTH-BANDAGES [b][+][/b]: Makeshift medical supplies. Use them to patch suit br
 
 ILLUMINATION:
 
-Your suit is equipped with a Limited Illumination Transducer (LIT) unit. This device utilizes scavenged and unstable crystal fragments [b][*][/b] to emit light.
+Your suit is equipped with a Geo-Luminescent Output Waveguide (GLOW) unit. This device utilizes scavenged and unstable crystal fragments [b][*][/b] to emit light.
 
-Be warned: The crystals degrade with use. The LIT unit will flicker and fail as the crystal drains. Find new crystals to replenish your light.
+Be warned: The crystals degrade with use. The GLOW unit will flicker and fail as the crystal drains. Find new crystals to replenish your light.
 
 THE HIVE:
 

@@ -28,9 +28,12 @@ var light_dur_init = GameState.light_durability
 var max_light_dur_init = GameState.max_light_durability
 var game_is_paused = false
 var tile_font = preload("res://fonts/SpaceMono-Regular.ttf")
+var level_transition = 2.0
 
 # --- Godot Functions ---
 func _ready():
+	fade_from_black()
+	
 	# 1. Generate the map data
 	map_data = generate_map()
 
@@ -49,6 +52,7 @@ func _ready():
 	self.position = screen_center - player_pixel_pos
 
 	# 6. Set the initial fog of war and UI
+	start_glow_effect()
 	update_fog()
 	update_ui()
 
@@ -146,12 +150,14 @@ func try_move(dx, dy):
 				player["hp"] += 5
 				player["hp"] = min(player["hp"], GameState.max_player_hp)
 				GameState.player_hp = player["hp"]
-				log_message("You repair your spacesuit.", Color.DEEP_SKY_BLUE)
+				if GameState.player_hp == GameState.max_player_hp:
+					log_message("You fully repair your spacesuit.", Color.DEEP_SKY_BLUE)
+				else: log_message("You partially repair your spacesuit.", Color.DEEP_SKY_BLUE)
 				update_ui()
 				map_data[target_x][target_y] = 0
 				tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
 			else:
-				log_message("You don't need repairs.", Color.GRAY)
+				log_message("Your spacesuit doesn't need repairs.", Color.GRAY)
 				update_fog()
 				return
 		if target_tile_type == 6:
@@ -166,7 +172,7 @@ func try_move(dx, dy):
 			GameState.has_light_source = true
 			GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
 			GameState.light_durability = GameState.max_light_durability
-			log_message("You pick up a crystal and power your LIT unit.", Color.YELLOW)
+			log_message("You pick up a crystal and power your GLOW unit.", Color.YELLOW)
 			$Timer.wait_time = 3.0
 			update_ui()
 			map_data[target_x][target_y] = 0
@@ -186,15 +192,16 @@ func try_move(dx, dy):
 			GameState.level += 1
 			if GameState.light_durability > 0:
 				GameState.has_light_source = true
-			get_tree().reload_current_scene()
 			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
+			await fade_to_black()
+			get_tree().reload_current_scene()
 
 		
 	if GameState.has_light_source and (dx != 0 or dy != 0):
 		GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
 			GameState.has_light_source = false
-			log_message("Your LIT unit flickers and goes dark!", Color.RED)
+			log_message("Your GLOW unit flickers and goes dark!", Color.RED)
 		update_ui()
 	
 	if GameState.has_light_source:
@@ -437,6 +444,12 @@ func create_map_tiles():
 				new_tile.text = tile_def["char"]
 			else:
 				new_tile.text = tile_definitions[0]["char"]
+				
+			if tile_type == 7:
+				new_tile.add_theme_color_override("font_shadow_color", Color(1, 1, 0, 0))
+				new_tile.add_theme_constant_override("shadow_outline_size", 12)
+				new_tile.add_theme_constant_override("shadow_offset_x", 0)
+				new_tile.add_theme_constant_override("shadow_offset_y", 0)
 			
 			new_tile.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			new_tile.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -609,3 +622,29 @@ func _on_yes_quit_pressed() -> void:
 func _on_no_quit_pressed() -> void:
 	game_is_paused = false
 	$CanvasLayer/QuitDialogue.hide()
+
+
+func fade_to_black():
+	var tween = create_tween()
+	tween.tween_property($CanvasLayer/FadeOverlay, "modulate", Color(1, 1, 1, 1), level_transition)
+	await tween.finished
+
+
+func fade_from_black():
+	var tween = create_tween()
+	var fadein = level_transition * 0.3
+	$CanvasLayer/FadeOverlay.modulate = Color(1, 1, 1, 1)
+	tween.tween_property($CanvasLayer/FadeOverlay, "modulate", Color(1, 1, 1, 0), fadein)
+	await tween.finished
+	$CanvasLayer/FadeOverlay.modulate = Color(1, 1, 1, 0)
+
+
+func start_glow_effect():
+	for y in range(map_data.size()):
+		for x in range(map_data[y].size()):
+			if map_data[y][x] == 7:
+				var crystal_label = tile_nodes[y][x]
+				var tween = create_tween()
+				tween.set_loops()
+				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color(1, 1, 0, 0.3), 1.5).set_trans(Tween.TRANS_SINE)
+				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color(1, 1, 0, 0), 1.5).set_trans(Tween.TRANS_SINE)

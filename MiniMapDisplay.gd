@@ -1,5 +1,9 @@
 extends Node2D
 
+var font = preload("res://fonts/SpaceMono-Regular.ttf")
+var mini_tile_size = 2
+var hp_to_break = 4
+
 func _process(delta):
 	# Tell the node to redraw itself on every frame.
 	queue_redraw()
@@ -8,12 +12,23 @@ func _process(delta):
 func _draw():
 	# Get a reference to the main game scene to access its variables.
 	var main_node = get_node("/root/Main")
-	if not main_node or not main_node.map_data:
+	if not main_node or not main_node.map_data or not main_node.player:
 		return # Don't draw if the main game isn't ready yet.
 
-	# Define the size of each tile on the mini-map.
-	var mini_tile_size = 2
-
+	# Broken minimap
+	var broken_hp = randf_range(hp_to_break - 0.5, hp_to_break + 0.05)
+	if main_node.player["hp"] <= broken_hp:
+		var time = Time.get_ticks_msec()
+		if time % 2000 < 1000:
+			var text = "OFF-LINE"
+			var font_size = 10
+			var text_size = font.get_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+			var center_pos = get_parent().size / 2
+			var text_pos = center_pos - (text_size / 2)
+			text_pos.y += 9
+			draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color.RED)
+		return
+	
 	# Loop through the entire map grid.
 	for y in range(main_node.map_data.size()):
 		for x in range(main_node.map_data[y].size()):
