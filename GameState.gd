@@ -6,7 +6,7 @@ var score = 0
 var level = 1
 var high_scores = []
 var has_light_source = true
-var light_durability = 100
+var light_durability = 110
 var max_light_durability = 210
 
 func _ready():

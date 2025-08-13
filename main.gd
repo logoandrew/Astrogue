@@ -1,13 +1,15 @@
 extends Node2D
 
+signal map_updated
+
 # --- Data Definitions ---
 var tile_definitions = {
-	0: { "char": ".", "color": Color("purple") },
-	1: { "char": "#", "color": Color("blue_violet") },
-	2: { "char": ">", "color": Color("gold") },
-	5: { "char": "+", "color": Color("deep_sky_blue") },
-	6: { "char": "&", "color": Color("sea_green") },
-	7: { "char": "*", "color": Color("yellow") }
+	GlobalEnums.TileType.FLOOR: { "char": ".", "color": Color("purple") },
+	GlobalEnums.TileType.WALL: { "char": "#", "color": Color("blue_violet") },
+	GlobalEnums.TileType.STAIRS: { "char": ">", "color": Color("orange") },
+	GlobalEnums.TileType.HEALTH: { "char": "+", "color": Color("deep_sky_blue") },
+	GlobalEnums.TileType.HP_UP: { "char": "&", "color": Color("sea_green") },
+	GlobalEnums.TileType.LIGHT: { "char": "*", "color": Color("yellow") }
 }
 
 var actor_definitions = {
@@ -29,6 +31,7 @@ var max_light_dur_init = GameState.max_light_durability
 var game_is_paused = false
 var tile_font = preload("res://fonts/SpaceMono-Regular.ttf")
 var level_transition = 2.0
+var transitioning = false
 
 # --- Godot Functions ---
 func _ready():
@@ -55,6 +58,7 @@ func _ready():
 	start_glow_effect()
 	update_fog()
 	update_ui()
+	map_updated.emit()
 
 
 func _process(delta):
@@ -75,7 +79,7 @@ func _process(delta):
 		game_is_paused = not game_is_paused
 		$CanvasLayer/QuitDialogue.visible = game_is_paused
 	
-	if not get_tree().paused and not game_is_paused:
+	if not get_tree().paused and not game_is_paused and not transitioning:
 		if is_player_turn:
 			if Input.is_action_just_pressed("ui_right"):
 				try_move(1, 0)
@@ -116,7 +120,7 @@ func is_tile_open(x, y):
 		for i in range (x - 1, x + 2):
 			if j < 0 or j >= map_data.size() or i < 0 or i >= map_data[0].size():
 				return false
-			if map_data[j][i] == 1:
+			if map_data[j][i] == GlobalEnums.TileType.WALL:
 				return false
 	return true
 
@@ -144,8 +148,8 @@ func try_move(dx, dy):
 				kill_actor(target_actor)
 		else:
 			log_message("You swing at the alien and miss!", Color.GRAY)
-	elif target_tile_type != 1:
-		if target_tile_type == 5:
+	elif target_tile_type != GlobalEnums.TileType.WALL:
+		if target_tile_type == GlobalEnums.TileType.HEALTH:
 			if player["hp"] < GameState.max_player_hp:
 				player["hp"] += 5
 				player["hp"] = min(player["hp"], GameState.max_player_hp)
@@ -154,40 +158,43 @@ func try_move(dx, dy):
 					log_message("You fully repair your spacesuit.", Color.DEEP_SKY_BLUE)
 				else: log_message("You partially repair your spacesuit.", Color.DEEP_SKY_BLUE)
 				update_ui()
-				map_data[target_x][target_y] = 0
-				tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
+				map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
+				tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
+				map_updated.emit()
 			else:
 				log_message("Your spacesuit doesn't need repairs.", Color.GRAY)
 				update_fog()
+				map_updated.emit()
 				return
-		if target_tile_type == 6:
+		elif target_tile_type == GlobalEnums.TileType.HP_UP:
 			GameState.max_player_hp += 1
 			player["hp"] += 1
 			player["hp"] = min(player["hp"], GameState.max_player_hp)
 			log_message("You scavenge a piece of armor", Color.SEA_GREEN)
 			update_ui()
-			map_data[target_x][target_y] = 0
-			tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
-		if target_tile_type == 7:
+			map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
+			tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
+			map_updated.emit()
+		elif target_tile_type == GlobalEnums.TileType.LIGHT:
 			GameState.has_light_source = true
 			GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
 			GameState.light_durability = GameState.max_light_durability
 			log_message("You pick up a crystal and power your GLOW unit.", Color.YELLOW)
 			$Timer.wait_time = 3.0
 			update_ui()
-			map_data[target_x][target_y] = 0
-			tile_nodes[target_y][target_x].text = tile_definitions[0]["char"]
+			map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
+			tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
+			map_updated.emit()
 
 
-		map_data[player["y"]][player["x"]] = 0
 		player["x"] = target_x
 		player["y"] = target_y
-		map_data[player["y"]][player["x"]] = 4
 		
 		player["label"].position = Vector2(player["x"] * tile_size, player["y"] * tile_size)
 		self.position = Vector2( -player["x"] * tile_size, -player["y"] * tile_size) + get_viewport_rect().size / 2
 		
-		if target_tile_type == 2:
+		if target_tile_type == GlobalEnums.TileType.STAIRS:
+			transitioning = true
 			GameState.score += 38 + (GameState.level * 2)
 			GameState.level += 1
 			if GameState.light_durability > 0:
@@ -215,6 +222,7 @@ func try_move(dx, dy):
 		$Timer.wait_time = 3.0
 	
 	update_fog()
+	map_updated.emit()
 
 
 func enemy_take_turn(actor):
@@ -252,11 +260,9 @@ func enemy_take_turn(actor):
 					player_death()
 			else:
 				log_message("The alien lunges at you and misses!", Color.GRAY)
-		elif map_data[target_y][target_x] == 0:
-			map_data[actor["y"]][actor["x"]] = 0
+		elif map_data[target_y][target_x] == GlobalEnums.TileType.FLOOR:
 			actor["x"] = target_x
 			actor["y"] = target_y
-			map_data[actor["y"]][actor["x"]] = 3
 			actor["label"].position = Vector2(actor["x"] * tile_size, actor["y"] * tile_size)
 
 
@@ -266,9 +272,10 @@ func kill_actor(actor):
 	actor["char"] = "%"
 	actor["color"] = Color("indigo")
 	actor["hp"] = 0
-	map_data[actor["y"]][actor["x"]] = 0
+	map_data[actor["y"]][actor["x"]] = GlobalEnums.TileType.FLOOR
 	update_ui()
 	update_fog()
+	map_updated.emit()
 
 
 func player_death():
@@ -279,11 +286,6 @@ func player_death():
 		$CanvasLayer/EnterHighScorePanel.show()
 	else:
 		get_tree().paused = true
-		if GameState.score > GameState.high_score:
-			GameState.high_score = GameState.score
-			GameState.save_high_score()
-			log_message("New High Score: " + str(GameState.high_score), Color.GOLD)
-		
 		log_message("--- GAME OVER ---", Color.WHITE)
 		log_message("Press [R] to restart", Color.GRAY)
 
@@ -332,14 +334,14 @@ func generate_map():
 	for y in range(height):
 		var row = []
 		for x in range(width):
-			row.append(1)
+			row.append(GlobalEnums.TileType.WALL)
 		new_map.append(row)
 	
 	var digger_x = width / 2
 	var digger_y = height / 2
 	var steps_to_take = 2000
 	for i in range(steps_to_take):
-		new_map[digger_y][digger_x] = 0
+		new_map[digger_y][digger_x] = GlobalEnums.TileType.FLOOR
 		var random_direction = randi_range(0, 3)
 		if random_direction == 0: digger_y -= 1
 		elif random_direction == 1: digger_y += 1
@@ -363,11 +365,10 @@ func spawn_actors_and_items():
 	while not player_placed:
 		var px = randi_range(1, map_data[0].size() - 2)
 		var py = randi_range(1, map_data.size() - 2)
-		if map_data[py][px] == 0:
+		if map_data[py][px] == GlobalEnums.TileType.FLOOR:
 			player["x"] = px
 			player["y"] = py
 			actors.append(player)
-			#map_data[py][px] = 4
 			player_placed = true
 
 	var enemies_to_place = 2 + GameState.level
@@ -376,32 +377,31 @@ func spawn_actors_and_items():
 		while not enemy_placed:
 			var ex = randi_range(1, map_data[0].size() - 2)
 			var ey = randi_range(1, map_data.size() - 2)
-			if map_data[ey][ex] == 0:
+			if map_data[ey][ex] == GlobalEnums.TileType.FLOOR:
 				var enemy_def = actor_definitions["alien"]
 				actors.append({
 					"x": ex, "y": ey, "hp": enemy_def["hp"],
 					"char": enemy_def["char"], "color": enemy_def["color"], "accuracy": enemy_def["accuracy"]
 				})
-				#map_data[ey][ex] = 3
 				enemy_placed = true
 	
-	var staircase_placed = false
-	while not staircase_placed:
+	var stairs_placed = false
+	while not stairs_placed:
 		var sx = randi_range(1, map_data[0].size() - 2)
 		var sy = randi_range(1, map_data.size() - 2)
-		if map_data[sy][sx] == 0 and is_tile_open(sx, sy):
-			map_data[sy][sx] = 2
-			staircase_placed = true
+		if map_data[sy][sx] == GlobalEnums.TileType.FLOOR and is_tile_open(sx, sy):
+			map_data[sy][sx] = GlobalEnums.TileType.STAIRS
+			stairs_placed = true
 	
-	var potions_to_place = 1
-	for i in range(potions_to_place):
-		var potion_placed = false
-		while not potion_placed:
+	var health_to_place = 1
+	for i in range(health_to_place):
+		var health_placed = false
+		while not health_placed:
 			var px = randi_range(1, map_data[0].size() - 2)
 			var py = randi_range(1, map_data.size() - 2)
-			if map_data[py][px] == 0 and is_tile_open(px, py):
-				map_data[py][px] = 5
-				potion_placed = true
+			if map_data[py][px] == GlobalEnums.TileType.FLOOR and is_tile_open(px, py):
+				map_data[py][px] = GlobalEnums.TileType.HEALTH
+				health_placed = true
 
 	var hp_chance = randi_range(1, 100)
 	if hp_chance <= 25:
@@ -411,21 +411,21 @@ func spawn_actors_and_items():
 			while not hp_placed:
 				var px = randi_range(1, map_data[0].size() - 2)
 				var py = randi_range(1, map_data.size() - 2)
-				if map_data[py][px] == 0:
-					map_data[py][px] = 6
+				if map_data[py][px] == GlobalEnums.TileType.FLOOR:
+					map_data[py][px] = GlobalEnums.TileType.HP_UP
 					hp_placed = true
 
-	var flashlight_chance = 100
+	var light_chance = 100
 	if GameState.level > 1:
-		flashlight_chance = max(25, 100 - ((GameState.level - 1) * 8))
-	if randi_range(1, 100) <= flashlight_chance:
-		var flashlight_placed = false
-		while not flashlight_placed:
+		light_chance = max(25, 100 - ((GameState.level - 1) * 8))
+	if randi_range(1, 100) <= light_chance:
+		var light_placed = false
+		while not light_placed:
 			var px = randi_range(1, map_data[0].size() - 2)
 			var py = randi_range(1, map_data.size() - 2)
-			if map_data[py][px] == 0:
-				map_data[py][px] = 7
-				flashlight_placed = true
+			if map_data[py][px] == GlobalEnums.TileType.FLOOR:
+				map_data[py][px] = GlobalEnums.TileType.LIGHT
+				light_placed = true
 
 
 func create_map_tiles():
@@ -435,7 +435,7 @@ func create_map_tiles():
 		var node_row = []
 		var fog_row = []
 		for x in range(map_data[y].size()):
-			fog_row.append(0)
+			fog_row.append(GlobalEnums.FogState.HIDDEN)
 			var tile_type = map_data[y][x]
 			var new_tile = Label.new()
 			new_tile.add_theme_font_override("font", tile_font)
@@ -443,9 +443,9 @@ func create_map_tiles():
 				var tile_def = tile_definitions[tile_type]
 				new_tile.text = tile_def["char"]
 			else:
-				new_tile.text = tile_definitions[0]["char"]
+				new_tile.text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
 				
-			if tile_type == 7:
+			if tile_type == GlobalEnums.TileType.LIGHT:
 				new_tile.add_theme_color_override("font_shadow_color", Color(1, 1, 0, 0))
 				new_tile.add_theme_constant_override("shadow_outline_size", 12)
 				new_tile.add_theme_constant_override("shadow_offset_x", 0)
@@ -495,11 +495,10 @@ func create_actor_labels():
 
 func update_fog():
 	# --- PART 1: Update the fog_map data ---
-	# First, set all currently 'visible' (2) tiles back to 'known' (1)
 	for y in range(fog_map.size()):
 		for x in range(fog_map[y].size()):
-			if fog_map[y][x] == 2:
-				fog_map[y][x] = 1
+			if fog_map[y][x] == GlobalEnums.FogState.VISIBLE:
+				fog_map[y][x] = GlobalEnums.FogState.KNOWN
 
 	# Then, calculate the new visible area based on whether we have a light
 	var vision_radius = 2.5 # Default small radius for dark mode
@@ -512,7 +511,7 @@ func update_fog():
 			if y >= 0 and y < map_data.size() and x >= 0 and x < map_data[0].size():
 				var tile_pos = Vector2(x, y)
 				if player_pos.distance_to(tile_pos) < vision_radius:
-					fog_map[y][x] = 2
+					fog_map[y][x] = GlobalEnums.FogState.VISIBLE
 
 	# --- PART 2: Update the visuals ---
 	# Update map tile visuals
@@ -520,7 +519,7 @@ func update_fog():
 		for x in range(map_data[y].size()):
 			var fog_state = fog_map[y][x]
 			var tile_node = tile_nodes[y][x]
-			if fog_state == 2: # Visible
+			if fog_state == GlobalEnums.FogState.VISIBLE:
 				var tile_type = map_data[y][x]
 				if tile_definitions.has(tile_type):
 					var color = tile_definitions[tile_type]["color"]
@@ -531,7 +530,7 @@ func update_fog():
 					else:
 						# With a light, show full color
 						tile_node.modulate = color
-			elif fog_state == 1: # Known
+			elif fog_state == GlobalEnums.FogState.KNOWN: 
 				tile_node.modulate = Color(0.2, 0.2, 0.2)
 			else: # Hidden
 				tile_node.modulate = Color(0, 0, 0)
@@ -541,7 +540,7 @@ func update_fog():
 		var fog_state = fog_map[actor["y"]][actor["x"]]
 		var actor_pos = Vector2(actor["x"], actor["y"])
 		
-		if fog_state == 2: # Actor is in a visible tile
+		if fog_state == GlobalEnums.FogState.VISIBLE:
 			if not GameState.has_light_source and actor != player:
 				# In dark mode, only see aliens if they are right next to you
 				if player_pos.distance_to(actor_pos) <= 1.5:
@@ -554,7 +553,7 @@ func update_fog():
 			
 			actor["label"].text = actor["char"]
 			actor["label"].modulate = actor["color"]
-		elif fog_state == 1: # In a known area
+		elif fog_state == GlobalEnums.FogState.KNOWN:
 			if actor["hp"] <= 0: # If it's a corpse
 				actor["label"].visible = true
 				actor["label"].text = actor["char"]
@@ -573,9 +572,11 @@ func _on_timer_timeout():
 			var flicker_duration = 0.15 + (1.0 - durability_percent) * 0.5
 			GameState.has_light_source = false
 			update_fog()
+			map_updated.emit()
 			await get_tree().create_timer(flicker_duration).timeout
 			GameState.has_light_source = true
 			update_fog()
+			map_updated.emit()
 
 
 func is_high_score():
@@ -637,12 +638,13 @@ func fade_from_black():
 	tween.tween_property($CanvasLayer/FadeOverlay, "modulate", Color(1, 1, 1, 0), fadein)
 	await tween.finished
 	$CanvasLayer/FadeOverlay.modulate = Color(1, 1, 1, 0)
+	transitioning = false
 
 
 func start_glow_effect():
 	for y in range(map_data.size()):
 		for x in range(map_data[y].size()):
-			if map_data[y][x] == 7:
+			if map_data[y][x] == GlobalEnums.TileType.LIGHT:
 				var crystal_label = tile_nodes[y][x]
 				var tween = create_tween()
 				tween.set_loops()

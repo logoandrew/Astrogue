@@ -2,15 +2,21 @@ extends Node2D
 
 var font = preload("res://fonts/SpaceMono-Regular.ttf")
 var mini_tile_size = 2
-var hp_to_break = 5
+var hp_to_break_map = 5
 var main_node
+var frame_counter = 0
 
 func _ready():
 	main_node = get_node("/root/Main")
+	if main_node:
+		main_node.map_updated.connect(queue_redraw)
+
 
 func _process(delta):
-	# Tell the node to redraw itself on every frame.
-	queue_redraw()
+	frame_counter += 1
+	if main_node and main_node.player and main_node.player["hp"] <= hp_to_break_map:
+		if frame_counter % 15 == 0:
+			queue_redraw()
 
 
 func _draw():
@@ -18,8 +24,8 @@ func _draw():
 		return # Don't draw if the main game isn't ready yet.
 
 	# Broken minimap
-	var broken_hp = randf_range(hp_to_break - 0.5, hp_to_break + 0.05)
-	if main_node.player["hp"] <= broken_hp:
+	var broken_map_hp = randf_range(hp_to_break_map - 0.5, hp_to_break_map + 0.05)
+	if main_node.player["hp"] <= broken_map_hp:
 		var time = Time.get_ticks_msec()
 		if time % 2000 < 1000:
 			var text = "OFF-LINE"
@@ -36,20 +42,16 @@ func _draw():
 		for x in range(main_node.map_data[y].size()):
 			var fog_state = main_node.fog_map[y][x]
 			
-			# Only draw tiles that are "known" (1) or "visible" (2).
-			if fog_state > 0:
+			# Only draw tiles that are "known" or "visible".
+			if fog_state == GlobalEnums.FogState.KNOWN or fog_state == GlobalEnums.FogState.VISIBLE:
 				var tile_type = main_node.map_data[y][x]
 				var tile_color
 
-				if tile_type == 1: # Wall
+				if tile_type == GlobalEnums.TileType.WALL:
 					tile_color = Color(0.4, 0.4, 0.4) # Dim white
-				elif tile_type == 2: # Stairs
+				elif tile_type == GlobalEnums.TileType.STAIRS:
 					tile_color = Color.MAGENTA
-				elif tile_type == 5: # Potion
-					tile_color = Color.DARK_ORANGE
-				elif tile_type == 6: # HP-Up
-					tile_color = Color.DARK_ORANGE
-				elif tile_type == 7: # Flashlight
+				elif tile_type == GlobalEnums.TileType.HEALTH or tile_type == GlobalEnums.TileType.HP_UP or tile_type == GlobalEnums.TileType.LIGHT:
 					tile_color = Color.DARK_ORANGE
 				else: # Floor
 					tile_color = Color(0.25, 0.25, 0.25) # Dim gray
