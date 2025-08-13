@@ -1,6 +1,6 @@
 extends Node
 
-var player_hp = 4
+var player_hp = 10
 var max_player_hp = 10
 var score = 0
 var level = 1

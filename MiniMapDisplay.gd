@@ -2,7 +2,11 @@ extends Node2D
 
 var font = preload("res://fonts/SpaceMono-Regular.ttf")
 var mini_tile_size = 2
-var hp_to_break = 4
+var hp_to_break = 5
+var main_node
+
+func _ready():
+	main_node = get_node("/root/Main")
 
 func _process(delta):
 	# Tell the node to redraw itself on every frame.
@@ -10,8 +14,6 @@ func _process(delta):
 
 
 func _draw():
-	# Get a reference to the main game scene to access its variables.
-	var main_node = get_node("/root/Main")
 	if not main_node or not main_node.map_data or not main_node.player:
 		return # Don't draw if the main game isn't ready yet.
 
