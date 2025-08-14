@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://japyvpunvb26"]
+[gd_scene load_steps=11 format=3 uid="uid://japyvpunvb26"]
 
 [ext_resource type="Script" uid="uid://fugettr3tcxt" path="res://main.gd" id="1_glv2v"]
 [ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://fonts/ShareTechMono-Regular.ttf" id="2_lgr22"]
@@ -9,6 +9,15 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glv2v"]
 bg_color = Color(0.129412, 0.713726, 0.243137, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3dxm6"]
+bg_color = Color(0.0588235, 0.0588235, 0.0588235, 1)
+expand_margin_left = 20.0
+expand_margin_top = 20.0
+expand_margin_right = 20.0
+expand_margin_bottom = 20.0
+shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
+shadow_size = 35
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uu6xs"]
 bg_color = Color(0.0605303, 0.0605303, 0.0605303, 1)
@@ -94,6 +103,66 @@ color = Color(0.0943044, 0.0943044, 0.0943043, 1)
 
 [node name="MiniMapDisplay" type="Node2D" parent="CanvasLayer/MiniMapBG"]
 script = ExtResource("2_uu6xs")
+
+[node name="ActionsLabel" type="Label" parent="CanvasLayer"]
+visible = false
+modulate = Color(0.58, 0.58, 0.58, 1)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -216.0
+offset_top = 60.0
+offset_right = 216.0
+offset_bottom = 84.0
+grow_horizontal = 2
+theme_override_fonts/font = ExtResource("5_trn2v")
+theme_override_font_sizes/font_size = 11
+text = "Press [e] to examine  |  Press [g] to pickup"
+horizontal_alignment = 1
+
+[node name="ExaminePanel" type="Panel" parent="CanvasLayer"]
+visible = false
+custom_minimum_size = Vector2(300, 300)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -150.0
+offset_right = 150.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_3dxm6")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ExaminePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ExamineText" type="RichTextLabel" parent="CanvasLayer/ExaminePanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 250)
+layout_mode = 2
+theme_override_constants/line_separation = 6
+theme_override_fonts/normal_font = ExtResource("2_lgr22")
+theme_override_fonts/mono_font = ExtResource("2_lgr22")
+theme_override_fonts/italics_font = ExtResource("3_3dxm6")
+theme_override_fonts/bold_italics_font = ExtResource("4_lgr22")
+theme_override_fonts/bold_font = ExtResource("5_trn2v")
+theme_override_font_sizes/bold_italics_font_size = 13
+theme_override_font_sizes/italics_font_size = 13
+theme_override_font_sizes/mono_font_size = 14
+theme_override_font_sizes/normal_font_size = 14
+theme_override_font_sizes/bold_font_size = 13
+
+[node name="OkBtn" type="Button" parent="CanvasLayer/ExaminePanel/VBoxContainer"]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_lgr22")
+text = "OK"
 
 [node name="EnterHighScorePanel" type="Panel" parent="CanvasLayer"]
 visible = false
@@ -195,6 +264,7 @@ text = "No"
 wait_time = 3.0
 autostart = true
 
+[connection signal="pressed" from="CanvasLayer/ExaminePanel/VBoxContainer/OkBtn" to="." method="_on_ok_pressed"]
 [connection signal="pressed" from="CanvasLayer/EnterHighScorePanel/VBoxContainer/SubmitButton" to="." method="_on_submit_hs_pressed"]
 [connection signal="pressed" from="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer/YesBtn" to="." method="_on_yes_quit_pressed"]
 [connection signal="pressed" from="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer/NoBtn" to="." method="_on_no_quit_pressed"]

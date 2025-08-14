@@ -8,6 +8,7 @@ var high_scores = []
 var has_light_source = true
 var light_durability = 110
 var max_light_durability = 210
+var item_lore = {}
 
 func _ready():
 	load_high_scores()

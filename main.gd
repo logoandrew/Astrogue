@@ -4,17 +4,76 @@ signal map_updated
 
 # --- Data Definitions ---
 var tile_definitions = {
-	GlobalEnums.TileType.FLOOR: { "char": ".", "color": Color("purple") },
-	GlobalEnums.TileType.WALL: { "char": "#", "color": Color("blue_violet") },
-	GlobalEnums.TileType.STAIRS: { "char": ">", "color": Color("orange") },
-	GlobalEnums.TileType.HEALTH: { "char": "+", "color": Color("deep_sky_blue") },
-	GlobalEnums.TileType.HP_UP: { "char": "&", "color": Color("sea_green") },
-	GlobalEnums.TileType.LIGHT: { "char": "*", "color": Color("yellow") }
+	GlobalEnums.TileType.FLOOR: { 
+		"char": ".", 
+		"color": Color("purple"), 
+		"is_item": false
+	},
+	GlobalEnums.TileType.WALL: { 
+		"char": "#", 
+		"color": Color("blue_violet"), 
+		"is_item": false
+	},
+	GlobalEnums.TileType.STAIRS: { 
+		"char": ">", 
+		"color": Color("orange"), 
+		"is_item": false
+	},
+	GlobalEnums.TileType.HEALTH: { 
+		"char": "+", 
+		"color": Color("deep_sky_blue"), 
+		"is_item": true,
+		"pickup_method": "auto",
+		"on_pickup": {
+			"effect": "heal",
+			"value": 5,
+			"message": {
+				"to_partial": "You partially repair your spacesuit.",
+				"to_full": "You fully repair your spacesuit.",
+				"is_full": "Your spacesuit doesn't need repairs."
+			}
+		}
+	},
+	GlobalEnums.TileType.HP_UP: { 
+		"char": "&", 
+		"color": Color("sea_green"), 
+		"is_item": true,
+		"pickup_method": "manual",
+		"on_pickup": {
+			"effect": "increase_max_hp",
+			"value": 1,
+			"message": {
+				"default": "You scavenge a piece of armor."
+			}
+		}
+	},
+	GlobalEnums.TileType.LIGHT: { 
+		"char": "*", 
+		"color": Color("yellow"), 
+		"is_item": true,
+		"pickup_method": "auto",
+		"on_pickup": {
+			"effect": "recharge_light",
+			"message": {
+				"default": "You pick up a crystal and recharge your GLOW unit."
+			}
+		}
+	}
 }
 
 var actor_definitions = {
-	"player": { "char": "@", "color": Color("cyan"), "hp": 10, "accuracy": 80 },
-	"alien": { "char": "A", "color": Color("light_green"), "hp": 3, "accuracy": 32 }
+	GlobalEnums.ActorType.PLAYER: { 
+		"char": "@", 
+		"color": Color("cyan"), 
+		"hp": 10, 
+		"accuracy": 80 
+	},
+	GlobalEnums.ActorType.ALIEN: { 
+		"char": "A", 
+		"color": Color("light_green"), 
+		"hp": 3, 
+		"accuracy": 32 
+	}
 }
 
 # --- Game State Variables ---
@@ -25,6 +84,16 @@ var fog_map = []
 var tile_nodes = []
 var map_data = []
 var message_history = []
+
+var peak_armor_level = 5
+var max_armor_chance = 90
+var min_armor_chance = 25
+var armor_chance_falloff = 15
+var min_armor_at_peak = 4
+var max_armor_at_peak = 8
+var min_armor_to_place = 1
+var armor_quantity_falloff = 2
+
 var is_player_turn = true
 var light_dur_init = GameState.light_durability
 var max_light_dur_init = GameState.max_light_durability
@@ -71,6 +140,7 @@ func _process(delta):
 		GameState.has_light_source = true
 		GameState.light_durability = light_dur_init
 		GameState.max_light_durability = max_light_dur_init
+		GameState.item_lore.clear()
 		get_tree().paused = false
 		get_tree().reload_current_scene()
 		return
@@ -80,6 +150,7 @@ func _process(delta):
 		$CanvasLayer/QuitDialogue.visible = game_is_paused
 	
 	if not get_tree().paused and not game_is_paused and not transitioning:
+		
 		if is_player_turn:
 			if Input.is_action_just_pressed("ui_right"):
 				try_move(1, 0)
@@ -93,6 +164,11 @@ func _process(delta):
 			elif Input.is_action_just_pressed("ui_down"):
 				try_move(0, 1)
 				is_player_turn = false
+			elif Input.is_action_just_pressed("examine"):
+				examine_tile()
+			elif Input.is_action_just_pressed("grab"):
+				if pickup_item():
+					is_player_turn = false
 			
 		if not is_player_turn:
 			# Loop backwards when processing turns to avoid issues when an actor is removed
@@ -137,6 +213,7 @@ func try_move(dx, dy):
 			target_actor = actor
 			break
 	
+	# Combat
 	if target_actor != null and target_actor != player and target_actor["hp"] > 0:
 		shake_camera()
 		var hit_chance = randi_range(1, 100)
@@ -148,50 +225,27 @@ func try_move(dx, dy):
 				kill_actor(target_actor)
 		else:
 			log_message("You swing at the alien and miss!", Color.GRAY)
+	# Non-combat
 	elif target_tile_type != GlobalEnums.TileType.WALL:
-		if target_tile_type == GlobalEnums.TileType.HEALTH:
-			if player["hp"] < GameState.max_player_hp:
-				player["hp"] += 5
-				player["hp"] = min(player["hp"], GameState.max_player_hp)
-				GameState.player_hp = player["hp"]
-				if GameState.player_hp == GameState.max_player_hp:
-					log_message("You fully repair your spacesuit.", Color.DEEP_SKY_BLUE)
-				else: log_message("You partially repair your spacesuit.", Color.DEEP_SKY_BLUE)
-				update_ui()
+		var tile_def = tile_definitions.get(target_tile_type)
+		var moved = true
+		if tile_def and tile_def.get("pickup_method") == "auto":
+			if apply_item_effect(tile_def):
 				map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
 				tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
 				map_updated.emit()
 			else:
-				log_message("Your spacesuit doesn't need repairs.", Color.GRAY)
-				update_fog()
-				map_updated.emit()
+				moved = false
 				return
-		elif target_tile_type == GlobalEnums.TileType.HP_UP:
-			GameState.max_player_hp += 1
-			player["hp"] += 1
-			player["hp"] = min(player["hp"], GameState.max_player_hp)
-			log_message("You scavenge a piece of armor", Color.SEA_GREEN)
-			update_ui()
-			map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
-			tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
-			map_updated.emit()
-		elif target_tile_type == GlobalEnums.TileType.LIGHT:
-			GameState.has_light_source = true
-			GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
-			GameState.light_durability = GameState.max_light_durability
-			log_message("You pick up a crystal and power your GLOW unit.", Color.YELLOW)
-			$Timer.wait_time = 3.0
-			update_ui()
-			map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
-			tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
-			map_updated.emit()
-
-
-		player["x"] = target_x
-		player["y"] = target_y
-		
-		player["label"].position = Vector2(player["x"] * tile_size, player["y"] * tile_size)
-		self.position = Vector2( -player["x"] * tile_size, -player["y"] * tile_size) + get_viewport_rect().size / 2
+		if moved:
+			player["x"] = target_x
+			player["y"] = target_y
+			player["label"].position = Vector2(player["x"] * tile_size, player["y"] * tile_size)
+			self.position = Vector2( -player["x"] * tile_size, -player["y"] * tile_size) + get_viewport_rect().size / 2
+			if tile_def and tile_def.get("pickup_method") == "manual":
+				$CanvasLayer/ActionsLabel.show()
+			else: 
+				$CanvasLayer/ActionsLabel.hide()
 		
 		if target_tile_type == GlobalEnums.TileType.STAIRS:
 			transitioning = true
@@ -202,8 +256,8 @@ func try_move(dx, dy):
 			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
 			await fade_to_black()
 			get_tree().reload_current_scene()
-
 		
+	# Light depletes on move
 	if GameState.has_light_source and (dx != 0 or dy != 0):
 		GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
@@ -211,6 +265,7 @@ func try_move(dx, dy):
 			log_message("Your GLOW unit flickers and goes dark!", Color.RED)
 		update_ui()
 	
+	# Light flickers with depletion
 	if GameState.has_light_source:
 		var durability_percent = float(GameState.light_durability) / float(GameState.max_light_durability)
 		if durability_percent > 0.18:
@@ -221,8 +276,61 @@ func try_move(dx, dy):
 	else: 
 		$Timer.wait_time = 3.0
 	
+	# Environment
 	update_fog()
 	map_updated.emit()
+
+
+func apply_item_effect(tile_def):
+	var effect_data = tile_def.on_pickup
+	var effect_type = effect_data.effect
+	var item_color = tile_def.color
+	
+	if effect_type == "heal":
+		if player["hp"] < GameState.max_player_hp:
+			player["hp"] = min(player["hp"] + effect_data.value, GameState.max_player_hp)
+			GameState.player_hp = player["hp"]
+			if GameState.player_hp == GameState.max_player_hp:
+				log_message(effect_data.message.to_full, item_color)
+			else: 
+				log_message(effect_data.message.to_partial, item_color)
+		else:
+			log_message(effect_data.message.is_full, item_color)
+			return false
+			
+	elif effect_type == "increase_max_hp":
+		GameState.max_player_hp += effect_data.value
+		player["hp"] += effect_data.value
+		log_message(effect_data.message.default, item_color)
+		
+	elif effect_type == "recharge_light":
+		GameState.has_light_source = true
+		GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
+		GameState.light_durability = GameState.max_light_durability
+		log_message(effect_data.message.default, item_color)
+		$Timer.wait_time = 3.0
+		
+	update_ui()
+	return true
+
+
+func pickup_item():
+	var player_pos = Vector2i(player.x, player.y)
+	var tile_type = map_data[player_pos.y][player_pos.x]
+	var tile_def = tile_definitions.get(tile_type)
+	
+	if tile_def and tile_def.get("pickup_method") == "manual":
+		if apply_item_effect(tile_def):
+			map_data[player_pos.y][player_pos.x] = GlobalEnums.TileType.FLOOR
+			tile_nodes[player_pos.y][player_pos.x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
+			$CanvasLayer/ActionsLabel.hide()
+			map_updated.emit()
+			return true
+		else:
+			return false
+	else:
+		log_message("There is nothing here to pick up.", Color.GRAY)
+		return false
 
 
 func enemy_take_turn(actor):
@@ -355,7 +463,7 @@ func generate_map():
 func spawn_actors_and_items():
 	actors.clear()
 	
-	var player_def = actor_definitions["player"]
+	var player_def = actor_definitions[GlobalEnums.ActorType.PLAYER]
 	player = {
 		"x": -1, "y": -1, "hp": GameState.player_hp,
 		"char": player_def["char"], "color": player_def["color"], "accuracy": player_def["accuracy"]
@@ -378,7 +486,7 @@ func spawn_actors_and_items():
 			var ex = randi_range(1, map_data[0].size() - 2)
 			var ey = randi_range(1, map_data.size() - 2)
 			if map_data[ey][ex] == GlobalEnums.TileType.FLOOR:
-				var enemy_def = actor_definitions["alien"]
+				var enemy_def = actor_definitions[GlobalEnums.ActorType.ALIEN]
 				actors.append({
 					"x": ex, "y": ey, "hp": enemy_def["hp"],
 					"char": enemy_def["char"], "color": enemy_def["color"], "accuracy": enemy_def["accuracy"]
@@ -403,17 +511,27 @@ func spawn_actors_and_items():
 				map_data[py][px] = GlobalEnums.TileType.HEALTH
 				health_placed = true
 
-	var hp_chance = randi_range(1, 100)
-	if hp_chance <= 25:
-		var hp_to_place = 1
+	var level_diff = abs(GameState.level - peak_armor_level)
+	var calculated_chance = max_armor_chance - (level_diff * armor_chance_falloff)
+	var final_chance = clamp(calculated_chance, min_armor_chance, max_armor_chance)
+	if randi_range(1, 100) <= final_chance:
+		var current_max_amount = max_armor_at_peak - (level_diff * armor_quantity_falloff)
+		var current_min_amount = min_armor_at_peak - (level_diff * armor_quantity_falloff)
+		var final_max_amount = clamp(current_max_amount, min_armor_to_place, max_armor_at_peak)
+		var final_min_amount = clamp(current_min_amount, min_armor_to_place, max_armor_at_peak)
+		var hp_to_place = randi_range(final_min_amount, final_max_amount)
 		for i in range(hp_to_place):
 			var hp_placed = false
-			while not hp_placed:
+			var placement_attempts = 0
+			while not hp_placed and placement_attempts < 100:
 				var px = randi_range(1, map_data[0].size() - 2)
 				var py = randi_range(1, map_data.size() - 2)
 				if map_data[py][px] == GlobalEnums.TileType.FLOOR:
 					map_data[py][px] = GlobalEnums.TileType.HP_UP
+					var item_position = Vector2(px, py)
+					GameState.item_lore[item_position] = LoreManager.generate_scout_lore()
 					hp_placed = true
+				placement_attempts += 1
 
 	var light_chance = 100
 	if GameState.level > 1:
@@ -617,6 +735,7 @@ func _on_yes_quit_pressed() -> void:
 	GameState.has_light_source = true
 	GameState.light_durability = light_dur_init
 	GameState.max_light_durability = max_light_dur_init
+	GameState.item_lore.clear()
 	get_tree().change_scene_to_file("res://TitleScreen.tscn")
 
 
@@ -650,3 +769,25 @@ func start_glow_effect():
 				tween.set_loops()
 				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color(1, 1, 0, 0.3), 1.5).set_trans(Tween.TRANS_SINE)
 				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color(1, 1, 0, 0), 1.5).set_trans(Tween.TRANS_SINE)
+
+
+func examine_tile():
+	var player_pos = Vector2(player.x, player.y)
+	var tile_type = map_data[player_pos.y][player_pos.x]
+	var message = "There is nothing to examine here."
+	
+	if tile_type == GlobalEnums.TileType.HP_UP:
+		var pretext = "According to the spacesuit data...\n\n"
+		if GameState.item_lore.has(player_pos):
+			var lore_text = GameState.item_lore[player_pos]
+			message = pretext + str(lore_text)
+		else:
+			message = pretext + "The scout's corpse is too mangled to examine."
+		$CanvasLayer/ExaminePanel/VBoxContainer/ExamineText.text = message
+		$CanvasLayer/ExaminePanel.show()
+	else:
+		log_message(message, Color.GRAY)
+
+
+func _on_ok_pressed() -> void:
+	$CanvasLayer/ExaminePanel.hide()
