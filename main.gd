@@ -315,7 +315,7 @@ func apply_item_effect(tile_def):
 
 
 func pickup_item():
-	var player_pos = Vector2i(player.x, player.y)
+	var player_pos = Vector2(player.x, player.y)
 	var tile_type = map_data[player_pos.y][player_pos.x]
 	var tile_def = tile_definitions.get(tile_type)
 	
@@ -501,42 +501,29 @@ func spawn_actors_and_items():
 			map_data[sy][sx] = GlobalEnums.TileType.STAIRS
 			stairs_placed = true
 	
+	
 	# --- HP_UP & HEALTH Spawning ---
 	# Calculate the distance from the peak level for item distribution.
 	var level_diff = abs(GameState.level - peak_armor_level)
-		
-	# 1. Determine the CHANCE of spawning a cluster of items (armor and health).
-	var calculated_chance = max_armor_chance - (level_diff * armor_chance_falloff)
-	var final_chance = clamp(calculated_chance, min_armor_chance, max_armor_chance)
-		
-	if randi_range(1, 100) <= final_chance:
-		# 2. If the chance succeeds, first determine the QUANTITY of ARMOR to place.
+	
+	# This will hold the number of armor pieces that spawn this level, if any.
+	var armor_placed_this_level = 0
+	
+	# 1. Determine the CHANCE and QUANTITY of ARMOR spawning.
+	var armor_spawn_chance = max_armor_chance - (level_diff * armor_chance_falloff)
+	var final_armor_chance = clamp(armor_spawn_chance, min_armor_chance, max_armor_chance)
+	
+	if randi_range(1, 100) <= final_armor_chance:
 		var current_max_armor = max_armor_at_peak - (level_diff * armor_quantity_falloff)
 		var current_min_armor = min_armor_at_peak - (level_diff * armor_quantity_falloff)
-			
+		
 		var final_max_armor = clamp(current_max_armor, min_armor_to_place, max_armor_at_peak)
 		var final_min_armor = clamp(current_min_armor, min_armor_to_place, max_armor_at_peak)
-			
-		var armor_to_place = randi_range(final_min_armor, final_max_armor)
-			
-		# 3. THEN, calculate the QUANTITY of HEALTH based on the amount of armor.
-		# It will be 75% of the armor amount, clamped between 1 and 4.
-		var health_to_place = clamp(round(armor_to_place * 0.75), 1, 4)
-
-		# 4. Place the calculated number of HEALTH items.
-		for i in range(health_to_place):
-			var health_placed = false
-			var placement_attempts = 0
-			while not health_placed and placement_attempts < 100:
-				var px = randi_range(1, map_data[0].size() - 2)
-				var py = randi_range(1, map_data.size() - 2)
-				if map_data[py][px] == GlobalEnums.TileType.FLOOR and is_tile_open(px, py):
-					map_data[py][px] = GlobalEnums.TileType.HEALTH
-					health_placed = true
-				placement_attempts += 1
-			
-		# 5. Finally, place the calculated number of ARMOR items.
-		for i in range(armor_to_place):
+		
+		armor_placed_this_level = randi_range(final_min_armor, final_max_armor)
+		
+		# Place the armor pieces.
+		for i in range(armor_placed_this_level):
 			var hp_placed = false
 			var placement_attempts = 0
 			while not hp_placed and placement_attempts < 100:
@@ -544,12 +531,33 @@ func spawn_actors_and_items():
 				var py = randi_range(1, map_data.size() - 2)
 				if map_data[py][px] == GlobalEnums.TileType.FLOOR:
 					map_data[py][px] = GlobalEnums.TileType.HP_UP
-						
-					var item_position = Vector2i(px, py)
+					var item_position = Vector2(px, py)
 					GameState.item_lore[item_position] = LoreManager.generate_scout_lore()
-						
 					hp_placed = true
 				placement_attempts += 1
+
+	# 2. Determine the QUANTITY of HEALTH to spawn.
+	# Always start with a base of 1 to guarantee at least one spawns.
+	var health_to_place = 1
+	
+	# If armor also spawned, add a bonus amount of health.
+	if armor_placed_this_level > 0:
+		health_to_place += round(armor_placed_this_level * 0.75)
+		
+	# Clamp the final amount to ensure it doesn't exceed the maximum.
+	health_to_place = clamp(health_to_place, 1, 4)
+
+	# 3. Place the health items.
+	for i in range(health_to_place):
+		var health_placed = false
+		var placement_attempts = 0
+		while not health_placed and placement_attempts < 100:
+			var px = randi_range(1, map_data[0].size() - 2)
+			var py = randi_range(1, map_data.size() - 2)
+			if map_data[py][px] == GlobalEnums.TileType.FLOOR and is_tile_open(px, py):
+				map_data[py][px] = GlobalEnums.TileType.HEALTH
+				health_placed = true
+			placement_attempts += 1
 	
 
 	var light_chance = 100
