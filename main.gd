@@ -501,26 +501,42 @@ func spawn_actors_and_items():
 			map_data[sy][sx] = GlobalEnums.TileType.STAIRS
 			stairs_placed = true
 	
-	var health_to_place = 1
-	for i in range(health_to_place):
-		var health_placed = false
-		while not health_placed:
-			var px = randi_range(1, map_data[0].size() - 2)
-			var py = randi_range(1, map_data.size() - 2)
-			if map_data[py][px] == GlobalEnums.TileType.FLOOR and is_tile_open(px, py):
-				map_data[py][px] = GlobalEnums.TileType.HEALTH
-				health_placed = true
-
+	# --- HP_UP & HEALTH Spawning ---
+	# Calculate the distance from the peak level for item distribution.
 	var level_diff = abs(GameState.level - peak_armor_level)
+		
+	# 1. Determine the CHANCE of spawning a cluster of items (armor and health).
 	var calculated_chance = max_armor_chance - (level_diff * armor_chance_falloff)
 	var final_chance = clamp(calculated_chance, min_armor_chance, max_armor_chance)
+		
 	if randi_range(1, 100) <= final_chance:
-		var current_max_amount = max_armor_at_peak - (level_diff * armor_quantity_falloff)
-		var current_min_amount = min_armor_at_peak - (level_diff * armor_quantity_falloff)
-		var final_max_amount = clamp(current_max_amount, min_armor_to_place, max_armor_at_peak)
-		var final_min_amount = clamp(current_min_amount, min_armor_to_place, max_armor_at_peak)
-		var hp_to_place = randi_range(final_min_amount, final_max_amount)
-		for i in range(hp_to_place):
+		# 2. If the chance succeeds, first determine the QUANTITY of ARMOR to place.
+		var current_max_armor = max_armor_at_peak - (level_diff * armor_quantity_falloff)
+		var current_min_armor = min_armor_at_peak - (level_diff * armor_quantity_falloff)
+			
+		var final_max_armor = clamp(current_max_armor, min_armor_to_place, max_armor_at_peak)
+		var final_min_armor = clamp(current_min_armor, min_armor_to_place, max_armor_at_peak)
+			
+		var armor_to_place = randi_range(final_min_armor, final_max_armor)
+			
+		# 3. THEN, calculate the QUANTITY of HEALTH based on the amount of armor.
+		# It will be 75% of the armor amount, clamped between 1 and 4.
+		var health_to_place = clamp(round(armor_to_place * 0.75), 1, 4)
+
+		# 4. Place the calculated number of HEALTH items.
+		for i in range(health_to_place):
+			var health_placed = false
+			var placement_attempts = 0
+			while not health_placed and placement_attempts < 100:
+				var px = randi_range(1, map_data[0].size() - 2)
+				var py = randi_range(1, map_data.size() - 2)
+				if map_data[py][px] == GlobalEnums.TileType.FLOOR and is_tile_open(px, py):
+					map_data[py][px] = GlobalEnums.TileType.HEALTH
+					health_placed = true
+				placement_attempts += 1
+			
+		# 5. Finally, place the calculated number of ARMOR items.
+		for i in range(armor_to_place):
 			var hp_placed = false
 			var placement_attempts = 0
 			while not hp_placed and placement_attempts < 100:
@@ -528,10 +544,13 @@ func spawn_actors_and_items():
 				var py = randi_range(1, map_data.size() - 2)
 				if map_data[py][px] == GlobalEnums.TileType.FLOOR:
 					map_data[py][px] = GlobalEnums.TileType.HP_UP
-					var item_position = Vector2(px, py)
+						
+					var item_position = Vector2i(px, py)
 					GameState.item_lore[item_position] = LoreManager.generate_scout_lore()
+						
 					hp_placed = true
 				placement_attempts += 1
+	
 
 	var light_chance = 100
 	if GameState.level > 1:
@@ -775,6 +794,10 @@ func examine_tile():
 	var player_pos = Vector2(player.x, player.y)
 	var tile_type = map_data[player_pos.y][player_pos.x]
 	var message = "There is nothing to examine here."
+	
+	if $CanvasLayer/ExaminePanel.visible:
+		$CanvasLayer/ExaminePanel.hide()
+		return
 	
 	if tile_type == GlobalEnums.TileType.HP_UP:
 		var pretext = "According to the spacesuit data...\n\n"
