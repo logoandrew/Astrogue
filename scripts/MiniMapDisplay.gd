@@ -1,6 +1,6 @@
 extends Node2D
 
-var font = preload("res://fonts/SpaceMono-Regular.ttf")
+var font = preload("res://assets/fonts/SpaceMono-Regular.ttf")
 var mini_tile_size = 2
 var hp_to_break_map = 5
 var main_node

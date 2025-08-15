@@ -85,20 +85,20 @@ var tile_nodes = []
 var map_data = []
 var message_history = []
 
-var peak_armor_level = 5
-var max_armor_chance = 90
-var min_armor_chance = 25
-var armor_chance_falloff = 15
-var min_armor_at_peak = 4
-var max_armor_at_peak = 8
+var peak_armor_level = randi_range(5, 9)
+var max_armor_chance = randi_range(80, 100)
+var min_armor_chance = randi_range(20, 30)
+var armor_chance_falloff = randi_range(5, 11)
+var min_armor_at_peak = randi_range(3, 5)
+var max_armor_at_peak = randi_range(6, 8)
 var min_armor_to_place = 1
-var armor_quantity_falloff = 2
+var armor_quantity_falloff = randi_range(1,2)
 
 var is_player_turn = true
 var light_dur_init = GameState.light_durability
 var max_light_dur_init = GameState.max_light_durability
 var game_is_paused = false
-var tile_font = preload("res://fonts/SpaceMono-Regular.ttf")
+var tile_font = preload("res://assets/fonts/SpaceMono-Regular.ttf")
 var level_transition = 2.0
 var transitioning = false
 
@@ -763,7 +763,7 @@ func _on_yes_quit_pressed() -> void:
 	GameState.light_durability = light_dur_init
 	GameState.max_light_durability = max_light_dur_init
 	GameState.item_lore.clear()
-	get_tree().change_scene_to_file("res://TitleScreen.tscn")
+	get_tree().change_scene_to_file("res://scenes/TitleScreen.tscn")
 
 
 func _on_no_quit_pressed() -> void:

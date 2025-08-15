@@ -13,13 +13,13 @@ config_version=5
 config/name="Astroque"
 run/main_scene="uid://l067fnf35t7p"
 config/features=PackedStringArray("4.4", "GL Compatibility")
-config/icon="res://icon.svg"
+config/icon="res://assets/icons/icon.svg"
 
 [autoload]
 
-GameState="*res://GameState.gd"
-GlobalEnums="*res://GlobalEnums.gd"
-LoreManager="*res://LoreManager.gd"
+GameState="*res://scripts/GameState.gd"
+GlobalEnums="*res://scripts/GlobalEnums.gd"
+LoreManager="*res://scripts/LoreManager.gd"
 
 [display]
 

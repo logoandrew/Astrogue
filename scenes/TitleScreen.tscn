@@ -1,10 +1,10 @@
 [gd_scene load_steps=7 format=3 uid="uid://l067fnf35t7p"]
 
-[ext_resource type="Script" uid="uid://6r6ywfsid7cp" path="res://TitleScreen.gd" id="1_fnlyl"]
-[ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://fonts/SpaceMono-Bold.ttf" id="2_2k3je"]
-[ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://fonts/ShareTechMono-Regular.ttf" id="2_skwql"]
-[ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://fonts/SpaceMono-Italic.ttf" id="4_6iguo"]
-[ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://fonts/SpaceMono-BoldItalic.ttf" id="5_g3l3g"]
+[ext_resource type="Script" uid="uid://6r6ywfsid7cp" path="res://scripts/TitleScreen.gd" id="1_4l16e"]
+[ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://assets/fonts/ShareTechMono-Regular.ttf" id="2_85feu"]
+[ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://assets/fonts/SpaceMono-Italic.ttf" id="3_66w26"]
+[ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://assets/fonts/SpaceMono-BoldItalic.ttf" id="4_3ej01"]
+[ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://assets/fonts/SpaceMono-Bold.ttf" id="5_w20ru"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fnlyl"]
 bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
@@ -22,7 +22,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_fnlyl")
+script = ExtResource("1_4l16e")
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 1
@@ -33,7 +33,7 @@ offset_left = -44.5
 offset_right = 44.5
 offset_bottom = 23.0
 grow_horizontal = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 theme_override_font_sizes/font_size = 48
 text = "ASTROGUE!"
 horizontal_alignment = 1
@@ -55,17 +55,17 @@ grow_vertical = 2
 
 [node name="StartGame" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 text = "Start Game"
 
 [node name="Instructions" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 text = "Instructions"
 
 [node name="HighScoreList" type="Button" parent="VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 text = "High Scores"
 
 [node name="InstructionsPanel" type="Panel" parent="."]
@@ -97,11 +97,11 @@ grow_vertical = 2
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 theme_override_constants/line_separation = 6
-theme_override_fonts/normal_font = ExtResource("2_skwql")
-theme_override_fonts/mono_font = ExtResource("2_skwql")
-theme_override_fonts/italics_font = ExtResource("4_6iguo")
-theme_override_fonts/bold_italics_font = ExtResource("5_g3l3g")
-theme_override_fonts/bold_font = ExtResource("2_2k3je")
+theme_override_fonts/normal_font = ExtResource("2_85feu")
+theme_override_fonts/mono_font = ExtResource("2_85feu")
+theme_override_fonts/italics_font = ExtResource("3_66w26")
+theme_override_fonts/bold_italics_font = ExtResource("4_3ej01")
+theme_override_fonts/bold_font = ExtResource("5_w20ru")
 theme_override_font_sizes/bold_italics_font_size = 13
 theme_override_font_sizes/italics_font_size = 13
 theme_override_font_sizes/mono_font_size = 14
@@ -138,7 +138,7 @@ Make your sacrifice count. Die well."
 
 [node name="Back" type="Button" parent="InstructionsPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 text = "Back"
 
 [node name="HighScoresPanel" type="Panel" parent="."]
@@ -170,7 +170,7 @@ grow_vertical = 2
 [node name="Label" type="Label" parent="HighScoresPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 theme_override_font_sizes/font_size = 20
 text = "High Scores:"
 horizontal_alignment = 1
@@ -178,16 +178,16 @@ horizontal_alignment = 1
 [node name="ScoreListLabel" type="RichTextLabel" parent="HighScoresPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-theme_override_fonts/normal_font = ExtResource("2_skwql")
-theme_override_fonts/mono_font = ExtResource("2_skwql")
-theme_override_fonts/italics_font = ExtResource("4_6iguo")
-theme_override_fonts/bold_italics_font = ExtResource("5_g3l3g")
-theme_override_fonts/bold_font = ExtResource("2_2k3je")
+theme_override_fonts/normal_font = ExtResource("2_85feu")
+theme_override_fonts/mono_font = ExtResource("2_85feu")
+theme_override_fonts/italics_font = ExtResource("3_66w26")
+theme_override_fonts/bold_italics_font = ExtResource("4_3ej01")
+theme_override_fonts/bold_font = ExtResource("5_w20ru")
 horizontal_alignment = 1
 
 [node name="Back" type="Button" parent="HighScoresPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = ExtResource("2_skwql")
+theme_override_fonts/font = ExtResource("2_85feu")
 text = "Back"
 
 [connection signal="pressed" from="VBoxContainer/StartGame" to="." method="_on_start_game_pressed"]

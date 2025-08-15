@@ -8,7 +8,7 @@ func _ready():
 
 
 func load_lore_data():
-	var file = FileAccess.open("res://lore.json", FileAccess.READ)
+	var file = FileAccess.open("res://lore/lore.json", FileAccess.READ)
 	if file:
 		var json_string = file.get_as_text()
 		var json = JSON.parse_string(json_string)
