@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="TileStats" load_steps=4 format=3 uid="uid://xn68co4xivlp"]
+
+[ext_resource type="Script" uid="uid://d1qn254t6e6c6" path="res://scripts/TileStats.gd" id="1_d8763"]
+[ext_resource type="Script" uid="uid://dj88afc5sj20n" path="res://scripts/PickupEffect.gd" id="1_x2uhl"]
+
+[sub_resource type="Resource" id="Resource_ugv0f"]
+script = ExtResource("1_x2uhl")
+effect = "increase_max_hp"
+value = 1
+message = {
+"default": "You scavenge a piece of armor."
+}
+metadata/_custom_type_script = "uid://dj88afc5sj20n"
+
+[resource]
+script = ExtResource("1_d8763")
+char = "&"
+color = Color(0.180392, 0.545098, 0.341176, 1)
+is_item = true
+pickup_method = "manual"
+pickup_effect = SubResource("Resource_ugv0f")
+metadata/_custom_type_script = "uid://d1qn254t6e6c6"

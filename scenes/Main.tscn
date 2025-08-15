@@ -1,271 +1,33 @@
 [gd_scene load_steps=11 format=3 uid="uid://japyvpunvb26"]
 
 [ext_resource type="Script" uid="uid://fugettr3tcxt" path="res://scripts/main.gd" id="1_c01mt"]
-[ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://assets/fonts/ShareTechMono-Regular.ttf" id="2_nxtc6"]
-[ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://assets/fonts/SpaceMono-Italic.ttf" id="3_jlsqs"]
-[ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://assets/fonts/SpaceMono-BoldItalic.ttf" id="4_q8u5g"]
-[ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://assets/fonts/SpaceMono-Bold.ttf" id="5_lhr70"]
-[ext_resource type="Script" uid="uid://momyt4c4d30h" path="res://scripts/MiniMapDisplay.gd" id="6_wp0k4"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glv2v"]
-bg_color = Color(0.129412, 0.713726, 0.243137, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3dxm6"]
-bg_color = Color(0.0588235, 0.0588235, 0.0588235, 1)
-expand_margin_left = 20.0
-expand_margin_top = 20.0
-expand_margin_right = 20.0
-expand_margin_bottom = 20.0
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
-shadow_size = 35
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uu6xs"]
-bg_color = Color(0.0605303, 0.0605303, 0.0605303, 1)
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
-shadow_size = 35
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0du0"]
-bg_color = Color(0.0497766, 0.0497767, 0.0497766, 1)
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
-shadow_size = 35
+[ext_resource type="Resource" uid="uid://bl6obrnxh8pyx" path="res://resources/player_stats.tres" id="2_jlsqs"]
+[ext_resource type="Resource" uid="uid://cfibwqnsnfu82" path="res://resources/alien_stats.tres" id="3_q8u5g"]
+[ext_resource type="Resource" uid="uid://ctg3p67jwi1fp" path="res://resources/tiles/floor.tres" id="4_mwfav"]
+[ext_resource type="Resource" uid="uid://b3si3wwji02ya" path="res://resources/tiles/wall.tres" id="5_3p2gp"]
+[ext_resource type="Resource" uid="uid://dqfbg1h8swmme" path="res://resources/tiles/stairs.tres" id="6_cvmbd"]
+[ext_resource type="Resource" uid="uid://b1ckuxw10ikbv" path="res://resources/tiles/health.tres" id="7_ft6cd"]
+[ext_resource type="Resource" uid="uid://xn68co4xivlp" path="res://resources/tiles/hp_up.tres" id="8_bb450"]
+[ext_resource type="Resource" uid="uid://ckx8kiq681uru" path="res://resources/tiles/light.tres" id="9_nfivy"]
+[ext_resource type="PackedScene" uid="uid://72p55jbchb73" path="res://scenes/HUD.tscn" id="10_lhr70"]
 
 [node name="Main" type="Node2D"]
 process_mode = 3
 script = ExtResource("1_c01mt")
-
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
-
-[node name="FadeOverlay" type="ColorRect" parent="CanvasLayer"]
-modulate = Color(0, 0, 0, 0)
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 1)
-
-[node name="HealthLabel" type="Label" parent="CanvasLayer"]
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -0.5
-offset_top = 25.0
-offset_right = 0.5
-offset_bottom = 48.0
-grow_horizontal = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-theme_override_font_sizes/font_size = 15
-horizontal_alignment = 1
-
-[node name="MessageLog" type="RichTextLabel" parent="CanvasLayer"]
-custom_minimum_size = Vector2(0, 70)
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_fonts/normal_font = ExtResource("2_nxtc6")
-theme_override_fonts/mono_font = ExtResource("2_nxtc6")
-theme_override_fonts/italics_font = ExtResource("3_jlsqs")
-theme_override_fonts/bold_italics_font = ExtResource("4_q8u5g")
-theme_override_fonts/bold_font = ExtResource("5_lhr70")
-theme_override_font_sizes/bold_italics_font_size = 14
-theme_override_font_sizes/italics_font_size = 14
-theme_override_font_sizes/mono_font_size = 15
-theme_override_font_sizes/normal_font_size = 15
-theme_override_font_sizes/bold_font_size = 14
-bbcode_enabled = true
-scroll_following = true
-
-[node name="HealthBar" type="ProgressBar" parent="CanvasLayer"]
-custom_minimum_size = Vector2(0, 10)
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 27.0
-grow_horizontal = 2
-scale = Vector2(1, 0.4)
-theme_override_styles/fill = SubResource("StyleBoxFlat_glv2v")
-show_percentage = false
-
-[node name="MiniMapBG" type="ColorRect" parent="CanvasLayer"]
-custom_minimum_size = Vector2(104, 104)
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -104.0
-offset_top = -104.0
-grow_horizontal = 0
-grow_vertical = 0
-color = Color(0.0943044, 0.0943044, 0.0943043, 1)
-
-[node name="MiniMapDisplay" type="Node2D" parent="CanvasLayer/MiniMapBG"]
-script = ExtResource("6_wp0k4")
-
-[node name="ActionsLabel" type="Label" parent="CanvasLayer"]
-visible = false
-modulate = Color(0.58, 0.58, 0.58, 1)
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -216.0
-offset_top = 60.0
-offset_right = 216.0
-offset_bottom = 84.0
-grow_horizontal = 2
-theme_override_fonts/font = ExtResource("5_lhr70")
-theme_override_font_sizes/font_size = 11
-text = "Press [e] to examine  |  Press [g] to pickup"
-horizontal_alignment = 1
-
-[node name="ExaminePanel" type="Panel" parent="CanvasLayer"]
-visible = false
-custom_minimum_size = Vector2(300, 300)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -150.0
-offset_right = 150.0
-offset_bottom = 150.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_3dxm6")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/ExaminePanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ExamineText" type="RichTextLabel" parent="CanvasLayer/ExaminePanel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 250)
-layout_mode = 2
-theme_override_constants/line_separation = 6
-theme_override_fonts/normal_font = ExtResource("2_nxtc6")
-theme_override_fonts/mono_font = ExtResource("2_nxtc6")
-theme_override_fonts/italics_font = ExtResource("3_jlsqs")
-theme_override_fonts/bold_italics_font = ExtResource("4_q8u5g")
-theme_override_fonts/bold_font = ExtResource("5_lhr70")
-theme_override_font_sizes/bold_italics_font_size = 13
-theme_override_font_sizes/italics_font_size = 13
-theme_override_font_sizes/mono_font_size = 14
-theme_override_font_sizes/normal_font_size = 14
-theme_override_font_sizes/bold_font_size = 13
-
-[node name="OkBtn" type="Button" parent="CanvasLayer/ExaminePanel/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-text = "OK"
-
-[node name="EnterHighScorePanel" type="Panel" parent="CanvasLayer"]
-visible = false
-custom_minimum_size = Vector2(300, 200)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_uu6xs")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/EnterHighScorePanel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -63.0
-offset_top = -46.5
-offset_right = 63.0
-offset_bottom = 46.5
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="Label" type="Label" parent="CanvasLayer/EnterHighScorePanel/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-text = "New High Score!"
-horizontal_alignment = 1
-
-[node name="LineEdit" type="LineEdit" parent="CanvasLayer/EnterHighScorePanel/VBoxContainer"]
-custom_minimum_size = Vector2(300, 0)
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-placeholder_text = "Enter your initials..."
-alignment = 1
-max_length = 3
-caret_blink = true
-
-[node name="SubmitButton" type="Button" parent="CanvasLayer/EnterHighScorePanel/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-text = "Submit"
-
-[node name="QuitDialogue" type="Panel" parent="CanvasLayer"]
-visible = false
-custom_minimum_size = Vector2(300, 100)
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_r0du0")
-
-[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/QuitDialogue"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-alignment = 1
-
-[node name="Label" type="Label" parent="CanvasLayer/QuitDialogue/VBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-text = "Quit to main menu?"
-horizontal_alignment = 1
-
-[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/QuitDialogue/VBoxContainer"]
-layout_mode = 2
-alignment = 1
-
-[node name="YesBtn" type="Button" parent="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-text = "Yes"
-
-[node name="NoBtn" type="Button" parent="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer"]
-layout_mode = 2
-theme_override_fonts/font = ExtResource("2_nxtc6")
-text = "No"
+player_stats = ExtResource("2_jlsqs")
+alien_stats = ExtResource("3_q8u5g")
+tile_size = 22
+floor_tile = ExtResource("4_mwfav")
+wall_tile = ExtResource("5_3p2gp")
+stairs_tile = ExtResource("6_cvmbd")
+health_tile = ExtResource("7_ft6cd")
+hp_up_tile = ExtResource("8_bb450")
+light_tile = ExtResource("9_nfivy")
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 3.0
 autostart = true
 
-[connection signal="pressed" from="CanvasLayer/ExaminePanel/VBoxContainer/OkBtn" to="." method="_on_ok_pressed"]
-[connection signal="pressed" from="CanvasLayer/EnterHighScorePanel/VBoxContainer/SubmitButton" to="." method="_on_submit_hs_pressed"]
-[connection signal="pressed" from="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer/YesBtn" to="." method="_on_yes_quit_pressed"]
-[connection signal="pressed" from="CanvasLayer/QuitDialogue/VBoxContainer/HBoxContainer/NoBtn" to="." method="_on_no_quit_pressed"]
+[node name="HUD" parent="." instance=ExtResource("10_lhr70")]
+
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

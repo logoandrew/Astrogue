@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ActorStats" load_steps=2 format=3 uid="uid://bl6obrnxh8pyx"]
+
+[ext_resource type="Script" uid="uid://i1it2k6f8d46" path="res://scripts/ActorStats.gd" id="1_wld0n"]
+
+[resource]
+script = ExtResource("1_wld0n")
+actor_type = 0
+char = "@"
+color = Color(0, 1, 1, 1)
+hp = 10
+accuracy = 80
+metadata/_custom_type_script = "uid://i1it2k6f8d46"

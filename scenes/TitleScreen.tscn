@@ -15,7 +15,7 @@ expand_margin_bottom = 20.0
 shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
 shadow_size = 35
 
-[node name="Control" type="Control"]
+[node name="TitleScreen" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0

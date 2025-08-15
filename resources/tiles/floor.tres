@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TileStats" load_steps=2 format=3 uid="uid://ctg3p67jwi1fp"]
+
+[ext_resource type="Script" uid="uid://d1qn254t6e6c6" path="res://scripts/TileStats.gd" id="1_ocpmn"]
+
+[resource]
+script = ExtResource("1_ocpmn")
+char = "."
+color = Color(0.627451, 0.12549, 0.941176, 1)
+is_item = false
+pickup_method = ""
+metadata/_custom_type_script = "uid://d1qn254t6e6c6"

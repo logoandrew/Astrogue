@@ -14,7 +14,7 @@ func _ready():
 
 func _process(delta):
 	frame_counter += 1
-	if main_node and main_node.player and main_node.player["hp"] <= hp_to_break_map:
+	if GameState.player_hp <= hp_to_break_map:
 		if frame_counter % 15 == 0:
 			queue_redraw()
 
@@ -25,7 +25,7 @@ func _draw():
 
 	# Broken minimap
 	var broken_map_hp = randf_range(hp_to_break_map - 0.5, hp_to_break_map + 0.05)
-	if main_node.player["hp"] <= broken_map_hp:
+	if GameState.player_hp <= broken_map_hp:
 		var time = Time.get_ticks_msec()
 		if time % 2000 < 1000:
 			var text = "OFF-LINE"

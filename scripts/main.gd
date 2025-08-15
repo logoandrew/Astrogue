@@ -3,107 +3,66 @@ extends Node2D
 signal map_updated
 
 # --- Data Definitions ---
-var tile_definitions = {
-	GlobalEnums.TileType.FLOOR: { 
-		"char": ".", 
-		"color": Color("purple"), 
-		"is_item": false
-	},
-	GlobalEnums.TileType.WALL: { 
-		"char": "#", 
-		"color": Color("blue_violet"), 
-		"is_item": false
-	},
-	GlobalEnums.TileType.STAIRS: { 
-		"char": ">", 
-		"color": Color("orange"), 
-		"is_item": false
-	},
-	GlobalEnums.TileType.HEALTH: { 
-		"char": "+", 
-		"color": Color("deep_sky_blue"), 
-		"is_item": true,
-		"pickup_method": "auto",
-		"on_pickup": {
-			"effect": "heal",
-			"value": 5,
-			"message": {
-				"to_partial": "You partially repair your spacesuit.",
-				"to_full": "You fully repair your spacesuit.",
-				"is_full": "Your spacesuit doesn't need repairs."
-			}
-		}
-	},
-	GlobalEnums.TileType.HP_UP: { 
-		"char": "&", 
-		"color": Color("sea_green"), 
-		"is_item": true,
-		"pickup_method": "manual",
-		"on_pickup": {
-			"effect": "increase_max_hp",
-			"value": 1,
-			"message": {
-				"default": "You scavenge a piece of armor."
-			}
-		}
-	},
-	GlobalEnums.TileType.LIGHT: { 
-		"char": "*", 
-		"color": Color("yellow"), 
-		"is_item": true,
-		"pickup_method": "auto",
-		"on_pickup": {
-			"effect": "recharge_light",
-			"message": {
-				"default": "You pick up a crystal and recharge your GLOW unit."
-			}
-		}
-	}
-}
-
-var actor_definitions = {
-	GlobalEnums.ActorType.PLAYER: { 
-		"char": "@", 
-		"color": Color("cyan"), 
-		"hp": 10, 
-		"accuracy": 80 
-	},
-	GlobalEnums.ActorType.ALIEN: { 
-		"char": "A", 
-		"color": Color("light_green"), 
-		"hp": 3, 
-		"accuracy": 32 
-	}
-}
+@export_group("Actor Definitions")
+@export var player_stats: ActorStats
+@export var alien_stats: ActorStats
+@export var corpse_char: String = "%"
+@export var corpse_color: Color = Color("indigo")
 
 # --- Game State Variables ---
+@export_group("Map Generation")
+@export var tile_size = 24
+@export var level_transition = 2.0
+
+@export_group("Tile Definitions")
+@export var floor_tile: TileStats
+@export var wall_tile: TileStats
+@export var stairs_tile: TileStats
+@export var health_tile: TileStats
+@export var hp_up_tile: TileStats
+@export var light_tile: TileStats
+
+@export_group("Armor: Peak Level")
+@export var lo_peak_armor_level = 5
+@export var hi_peak_armor_level = 9
+var peak_armor_level = randi_range(lo_peak_armor_level, hi_peak_armor_level)
+@export_group("Armor: Chance")
+@export var min_armor_chance = 35
+@export var max_armor_chance = 100
+@export_group("Armor: Chance Falloff")
+@export var lo_armor_chance_falloff = 5
+@export var hi_armor_chance_falloff = 11
+var armor_chance_falloff = randi_range(lo_armor_chance_falloff, hi_armor_chance_falloff)
+@export_group("Armor: at Peak")
+@export var min_armor_at_peak = 3
+@export var max_armor_at_peak = 8
+@export_group("Armor: Quantity Falloff")
+@export var lo_armor_quantity_falloff = 1
+@export var hi_armor_quantity_falloff = 2
+var armor_quantity_falloff = randi_range(lo_armor_quantity_falloff, hi_armor_quantity_falloff)
+@export_group("Armor: Min to Place (if passes)")
+@export var min_armor_to_place = 1
+
+@onready var hud = $HUD
+
+var tile_data = {}
 var actors = []
 var player
-var tile_size = 24
 var fog_map = []
 var tile_nodes = []
 var map_data = []
-var message_history = []
-
-var peak_armor_level = randi_range(5, 9)
-var max_armor_chance = randi_range(80, 100)
-var min_armor_chance = randi_range(20, 30)
-var armor_chance_falloff = randi_range(5, 11)
-var min_armor_at_peak = randi_range(3, 5)
-var max_armor_at_peak = randi_range(6, 8)
-var min_armor_to_place = 1
-var armor_quantity_falloff = randi_range(1,2)
 
 var is_player_turn = true
 var light_dur_init = GameState.light_durability
 var max_light_dur_init = GameState.max_light_durability
-var game_is_paused = false
 var tile_font = preload("res://assets/fonts/SpaceMono-Regular.ttf")
-var level_transition = 2.0
 var transitioning = false
+var game_is_paused = false
+var game_over = false
 
 # --- Godot Functions ---
 func _ready():
+	_initialize_tile_data()
 	fade_from_black()
 	
 	# 1. Generate the map data
@@ -126,8 +85,9 @@ func _ready():
 	# 6. Set the initial fog of war and UI
 	start_glow_effect()
 	update_fog()
-	update_ui()
 	map_updated.emit()
+	hud.quit_to_menu_requested.connect(_on_quit_to_menu_requested)
+	hud.high_score_submitted.connect(_on_high_score_submitted)
 
 
 func _process(delta):
@@ -147,9 +107,9 @@ func _process(delta):
 	
 	if Input.is_action_just_pressed("ui_cancel"):
 		game_is_paused = not game_is_paused
-		$CanvasLayer/QuitDialogue.visible = game_is_paused
+		hud.get_node("QuitDialogue").visible = game_is_paused
 	
-	if not get_tree().paused and not game_is_paused and not transitioning:
+	if not game_over and not transitioning:
 		
 		if is_player_turn:
 			if Input.is_action_just_pressed("ui_right"):
@@ -191,6 +151,15 @@ func _draw():
 		draw_line(Vector2(-grid_range * tile_size, y), Vector2(grid_range * tile_size, y), Color(0.1, 0.1, 0.1))
 
 
+func _initialize_tile_data():
+	tile_data[GlobalEnums.TileType.FLOOR] = floor_tile
+	tile_data[GlobalEnums.TileType.WALL] = wall_tile
+	tile_data[GlobalEnums.TileType.STAIRS] = stairs_tile
+	tile_data[GlobalEnums.TileType.HEALTH] = health_tile
+	tile_data[GlobalEnums.TileType.HP_UP] = hp_up_tile
+	tile_data[GlobalEnums.TileType.LIGHT] = light_tile
+
+
 func is_tile_open(x, y):
 	for j in range(y - 1, y + 2):
 		for i in range (x - 1, x + 2):
@@ -220,19 +189,19 @@ func try_move(dx, dy):
 		if hit_chance <= player["accuracy"]:
 			target_actor["hp"] -= 1
 			target_actor["health_bar"].value = target_actor["hp"]
-			log_message("You hit the alien! It has " + str(target_actor["hp"]) + " HP left.", Color.ORANGE)
+			hud.log_message("You hit the alien! It has " + str(target_actor["hp"]) + " HP left.", Color.ORANGE)
 			if target_actor["hp"] <= 0:
 				kill_actor(target_actor)
 		else:
-			log_message("You swing at the alien and miss!", Color.GRAY)
+			hud.log_message("You swing at the alien and miss!", Color.GRAY)
 	# Non-combat
 	elif target_tile_type != GlobalEnums.TileType.WALL:
-		var tile_def = tile_definitions.get(target_tile_type)
+		var tile_def = tile_data.get(target_tile_type)
 		var moved = true
-		if tile_def and tile_def.get("pickup_method") == "auto":
+		if tile_def and tile_def.pickup_method == "auto":
 			if apply_item_effect(tile_def):
 				map_data[target_y][target_x] = GlobalEnums.TileType.FLOOR
-				tile_nodes[target_y][target_x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
+				tile_nodes[target_y][target_x].text = tile_data[GlobalEnums.TileType.FLOOR].char
 				map_updated.emit()
 			else:
 				moved = false
@@ -242,10 +211,10 @@ func try_move(dx, dy):
 			player["y"] = target_y
 			player["label"].position = Vector2(player["x"] * tile_size, player["y"] * tile_size)
 			self.position = Vector2( -player["x"] * tile_size, -player["y"] * tile_size) + get_viewport_rect().size / 2
-			if tile_def and tile_def.get("pickup_method") == "manual":
-				$CanvasLayer/ActionsLabel.show()
+			if tile_def and tile_def.pickup_method == "manual":
+				hud.get_node("ActionsLabel").show()
 			else: 
-				$CanvasLayer/ActionsLabel.hide()
+				hud.get_node("ActionsLabel").hide()
 		
 		if target_tile_type == GlobalEnums.TileType.STAIRS:
 			transitioning = true
@@ -253,7 +222,7 @@ func try_move(dx, dy):
 			GameState.level += 1
 			if GameState.light_durability > 0:
 				GameState.has_light_source = true
-			log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
+			hud.log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
 			await fade_to_black()
 			get_tree().reload_current_scene()
 		
@@ -262,8 +231,7 @@ func try_move(dx, dy):
 		GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
 			GameState.has_light_source = false
-			log_message("Your GLOW unit flickers and goes dark!", Color.RED)
-		update_ui()
+			hud.log_message("Your GLOW unit flickers and goes dark!", Color.RED)
 	
 	# Light flickers with depletion
 	if GameState.has_light_source:
@@ -282,54 +250,52 @@ func try_move(dx, dy):
 
 
 func apply_item_effect(tile_def):
-	var effect_data = tile_def.on_pickup
+	var effect_data = tile_def.pickup_effect
 	var effect_type = effect_data.effect
 	var item_color = tile_def.color
 	
 	if effect_type == "heal":
-		if player["hp"] < GameState.max_player_hp:
-			player["hp"] = min(player["hp"] + effect_data.value, GameState.max_player_hp)
-			GameState.player_hp = player["hp"]
+		if GameState.player_hp < GameState.max_player_hp:
+			GameState.player_hp = min(GameState.player_hp + effect_data.value, GameState.max_player_hp)
 			if GameState.player_hp == GameState.max_player_hp:
-				log_message(effect_data.message.to_full, item_color)
+				hud.log_message(effect_data.message["to_full"], item_color)
 			else: 
-				log_message(effect_data.message.to_partial, item_color)
+				hud.log_message(effect_data.message["to_partial"], item_color)
 		else:
-			log_message(effect_data.message.is_full, item_color)
+			hud.log_message(effect_data.message["is_full"], item_color)
 			return false
 			
 	elif effect_type == "increase_max_hp":
 		GameState.max_player_hp += effect_data.value
-		player["hp"] += effect_data.value
-		log_message(effect_data.message.default, item_color)
+		GameState.player_hp += effect_data.value
+		hud.log_message(effect_data.message["default"], item_color)
 		
 	elif effect_type == "recharge_light":
 		GameState.has_light_source = true
 		GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
 		GameState.light_durability = GameState.max_light_durability
-		log_message(effect_data.message.default, item_color)
+		hud.log_message(effect_data.message["default"], item_color)
 		$Timer.wait_time = 3.0
 		
-	update_ui()
 	return true
 
 
 func pickup_item():
 	var player_pos = Vector2(player.x, player.y)
 	var tile_type = map_data[player_pos.y][player_pos.x]
-	var tile_def = tile_definitions.get(tile_type)
+	var tile_def = tile_data.get(tile_type)
 	
-	if tile_def and tile_def.get("pickup_method") == "manual":
+	if tile_def and tile_def.pickup_method == "manual":
 		if apply_item_effect(tile_def):
 			map_data[player_pos.y][player_pos.x] = GlobalEnums.TileType.FLOOR
-			tile_nodes[player_pos.y][player_pos.x].text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
-			$CanvasLayer/ActionsLabel.hide()
+			tile_nodes[player_pos.y][player_pos.x].text = tile_data[GlobalEnums.TileType.FLOOR].char
+			hud.get_node("ActionsLabel").hide()
 			map_updated.emit()
 			return true
 		else:
 			return false
 	else:
-		log_message("There is nothing here to pick up.", Color.GRAY)
+		hud.log_message("There is nothing here to pick up.", Color.GRAY)
 		return false
 
 
@@ -360,14 +326,12 @@ func enemy_take_turn(actor):
 			shake_camera()
 			var hit_chance = randi_range(1, 100)
 			if hit_chance <= actor["accuracy"] + GameState.level:
-				player["hp"] -= 1
-				GameState.player_hp = player["hp"]
-				log_message("The alien attacks you! You have " + str(player["hp"]) + " HP left.", Color.RED)
-				update_ui()
-				if player["hp"] <= 0:
+				GameState.player_hp -= 1
+				hud.log_message("The alien attacks you! You have " + str(GameState.player_hp) + " HP left.", Color.RED)
+				if GameState.player_hp <= 0:
 					player_death()
 			else:
-				log_message("The alien lunges at you and misses!", Color.GRAY)
+				hud.log_message("The alien lunges at you and misses!", Color.GRAY)
 		elif map_data[target_y][target_x] == GlobalEnums.TileType.FLOOR:
 			actor["x"] = target_x
 			actor["y"] = target_y
@@ -375,27 +339,27 @@ func enemy_take_turn(actor):
 
 
 func kill_actor(actor):
-	log_message("The alien is defeated!", Color.LIGHT_GREEN)
+	hud.log_message("The alien is defeated!", Color.LIGHT_GREEN)
 	GameState.score += 9 + GameState.level
-	actor["char"] = "%"
-	actor["color"] = Color("indigo")
+	actor["char"] = corpse_char
+	actor["color"] = corpse_color
 	actor["hp"] = 0
 	map_data[actor["y"]][actor["x"]] = GlobalEnums.TileType.FLOOR
-	update_ui()
 	update_fog()
 	map_updated.emit()
 
 
 func player_death():
-	log_message("You have been defeated!", Color.DARK_RED)
+	game_over = true
+	hud.log_message("You have been defeated!", Color.DARK_RED)
 	is_player_turn = false
 	
 	if is_high_score():
-		$CanvasLayer/EnterHighScorePanel.show()
+		hud.get_node("EnterHighScorePanel").show()
 	else:
 		get_tree().paused = true
-		log_message("--- GAME OVER ---", Color.WHITE)
-		log_message("Press [R] to restart", Color.GRAY)
+		hud.log_message("--- GAME OVER ---", Color.WHITE)
+		hud.log_message("Press [R] to restart", Color.GRAY)
 
 
 func shake_camera():
@@ -404,35 +368,6 @@ func shake_camera():
 	var shake_duration = 0.18
 	tween.tween_property(self, "position", self.position + Vector2(randi_range(-shake_amount, shake_amount), randi_range(-shake_amount, shake_amount)), shake_duration / 2).set_trans(Tween.TRANS_SINE)
 	tween.tween_property(self, "position", self.position, shake_duration / 2).set_trans(Tween.TRANS_SINE)
-
-
-func update_ui():
-	var health_label = $CanvasLayer/HealthLabel
-	var top_score = 0
-	if not GameState.high_scores.is_empty():
-		top_score = GameState.high_scores[0]["score"]
-	health_label.text = "HP: " + str(player["hp"]) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(top_score) + "  |  Level: " + str(GameState.level)# + "  |  FL: " + str(GameState.light_durability) + "/" + str(GameState.max_light_durability)
-	
-	var health_bar = $CanvasLayer/HealthBar
-	health_bar.max_value = GameState.max_player_hp
-	health_bar.value = player["hp"]
-
-
-func log_message(message, color = Color.WHITE):
-	message_history.append({ "text": message, "color": color })
-	if message_history.size() > 10:
-		message_history.pop_front()
-	var message_log = $CanvasLayer/MessageLog
-	message_log.clear()
-	for i in range(message_history.size()):
-		var msg_data = message_history[i]
-		var text = msg_data["text"]
-		var text_color = msg_data["color"]
-		if i < message_history.size() - 1:
-			text_color.a = 0.5
-		message_log.bbcode_enabled = true
-		message_log.scroll_following = true
-		message_log.append_text("[color=" + text_color.to_html(true) + "]" + text + "[/color]\n")
 
 
 func generate_map():
@@ -463,10 +398,9 @@ func generate_map():
 func spawn_actors_and_items():
 	actors.clear()
 	
-	var player_def = actor_definitions[GlobalEnums.ActorType.PLAYER]
 	player = {
 		"x": -1, "y": -1, "hp": GameState.player_hp,
-		"char": player_def["char"], "color": player_def["color"], "accuracy": player_def["accuracy"]
+		"char": player_stats.char, "color": player_stats.color, "accuracy": player_stats.accuracy
 	}
 	
 	var player_placed = false
@@ -486,10 +420,9 @@ func spawn_actors_and_items():
 			var ex = randi_range(1, map_data[0].size() - 2)
 			var ey = randi_range(1, map_data.size() - 2)
 			if map_data[ey][ex] == GlobalEnums.TileType.FLOOR:
-				var enemy_def = actor_definitions[GlobalEnums.ActorType.ALIEN]
 				actors.append({
-					"x": ex, "y": ey, "hp": enemy_def["hp"],
-					"char": enemy_def["char"], "color": enemy_def["color"], "accuracy": enemy_def["accuracy"]
+					"x": ex, "y": ey, "hp": alien_stats.hp,
+					"char": alien_stats.char, "color": alien_stats.color, "accuracy": alien_stats.accuracy
 				})
 				enemy_placed = true
 	
@@ -584,11 +517,11 @@ func create_map_tiles():
 			var tile_type = map_data[y][x]
 			var new_tile = Label.new()
 			new_tile.add_theme_font_override("font", tile_font)
-			if tile_definitions.has(tile_type):
-				var tile_def = tile_definitions[tile_type]
-				new_tile.text = tile_def["char"]
+			if tile_data.has(tile_type):
+				var tile_def = tile_data[tile_type]
+				new_tile.text = tile_def.char
 			else:
-				new_tile.text = tile_definitions[GlobalEnums.TileType.FLOOR]["char"]
+				new_tile.text = tile_data[GlobalEnums.TileType.FLOOR].char
 				
 			if tile_type == GlobalEnums.TileType.LIGHT:
 				new_tile.add_theme_color_override("font_shadow_color", Color(1, 1, 0, 0))
@@ -666,8 +599,8 @@ func update_fog():
 			var tile_node = tile_nodes[y][x]
 			if fog_state == GlobalEnums.FogState.VISIBLE:
 				var tile_type = map_data[y][x]
-				if tile_definitions.has(tile_type):
-					var color = tile_definitions[tile_type]["color"]
+				if tile_data.has(tile_type):
+					var color = tile_data[tile_type].color
 					if not GameState.has_light_source:
 						# In dark mode, desaturate the color
 						var brightness = color.v / 2.5
@@ -733,57 +666,19 @@ func is_high_score():
 	return false
 
 
-func _on_submit_hs_pressed() -> void:
-	var line_edit = $CanvasLayer/EnterHighScorePanel/VBoxContainer/LineEdit
-	var player_tag = line_edit.text.to_upper()
-	if player_tag.length() > 3:
-		player_tag = player_tag.substr(0, 3)
-	while player_tag.length() < 3:
-		player_tag += " "
-	var new_score_entry = { "tag": player_tag, "score": GameState.score }
-	GameState.high_scores.append(new_score_entry)
-	GameState.high_scores.sort_custom(func(a, b): return a.score > b.score)
-	if GameState.high_scores.size() > 10:
-		GameState.high_scores.resize(10)
-	GameState.save_high_scores()
-	$CanvasLayer/EnterHighScorePanel.hide()
-	get_tree().paused = true
-	log_message("--- GAME OVER ---", Color.WHITE)
-	log_message("Press [R] to restart", Color.GRAY)
-
-
-func _on_yes_quit_pressed() -> void:
-	game_is_paused = false
-	get_tree().paused = false
-	GameState.score = 0
-	GameState.level = 1
-	GameState.max_player_hp = 10
-	GameState.player_hp = GameState.max_player_hp
-	GameState.has_light_source = true
-	GameState.light_durability = light_dur_init
-	GameState.max_light_durability = max_light_dur_init
-	GameState.item_lore.clear()
-	get_tree().change_scene_to_file("res://scenes/TitleScreen.tscn")
-
-
-func _on_no_quit_pressed() -> void:
-	game_is_paused = false
-	$CanvasLayer/QuitDialogue.hide()
-
-
 func fade_to_black():
 	var tween = create_tween()
-	tween.tween_property($CanvasLayer/FadeOverlay, "modulate", Color(1, 1, 1, 1), level_transition)
+	tween.tween_property(hud.get_node("FadeOverlay"), "modulate", Color(1, 1, 1, 1), level_transition)
 	await tween.finished
 
 
 func fade_from_black():
 	var tween = create_tween()
 	var fadein = level_transition * 0.3
-	$CanvasLayer/FadeOverlay.modulate = Color(1, 1, 1, 1)
-	tween.tween_property($CanvasLayer/FadeOverlay, "modulate", Color(1, 1, 1, 0), fadein)
+	hud.get_node("FadeOverlay").modulate = Color(1, 1, 1, 1)
+	tween.tween_property(hud.get_node("FadeOverlay"), "modulate", Color(1, 1, 1, 0), fadein)
 	await tween.finished
-	$CanvasLayer/FadeOverlay.modulate = Color(1, 1, 1, 0)
+	hud.get_node("FadeOverlay").modulate = Color(1, 1, 1, 0)
 	transitioning = false
 
 
@@ -803,8 +698,8 @@ func examine_tile():
 	var tile_type = map_data[player_pos.y][player_pos.x]
 	var message = "There is nothing to examine here."
 	
-	if $CanvasLayer/ExaminePanel.visible:
-		$CanvasLayer/ExaminePanel.hide()
+	if hud.get_node("ExaminePanel").visible:
+		hud.get_node("ExaminePanel").hide()
 		return
 	
 	if tile_type == GlobalEnums.TileType.HP_UP:
@@ -814,11 +709,37 @@ func examine_tile():
 			message = pretext + str(lore_text)
 		else:
 			message = pretext + "The scout's corpse is too mangled to examine."
-		$CanvasLayer/ExaminePanel/VBoxContainer/ExamineText.text = message
-		$CanvasLayer/ExaminePanel.show()
+		hud.get_node("ExaminePanel/VBoxContainer/ExamineText").text = message
+		hud.get_node("ExaminePanel").show()
 	else:
-		log_message(message, Color.GRAY)
+		hud.log_message(message, Color.GRAY)
 
 
-func _on_ok_pressed() -> void:
-	$CanvasLayer/ExaminePanel.hide()
+func _on_high_score_submitted(player_tag):
+	if player_tag.length() > 3:
+		player_tag = player_tag.substr(0, 3)
+	while player_tag.length() < 3:
+		player_tag += " "
+	var new_score_entry = { "tag": player_tag, "score": GameState.score }
+	GameState.high_scores.append(new_score_entry)
+	GameState.high_scores.sort_custom(func(a, b): return a.score > b.score)
+	if GameState.high_scores.size() > 10:
+		GameState.high_scores.resize(10)
+	GameState.save_high_scores()
+	get_tree().paused = true
+	hud.log_message("--- GAME OVER ---", Color.WHITE)
+	hud.log_message("Press [R] to restart", Color.GRAY)
+
+
+func _on_quit_to_menu_requested():
+	game_is_paused = false
+	get_tree().paused = false
+	GameState.score = 0
+	GameState.level = 1
+	GameState.max_player_hp = 10
+	GameState.player_hp = GameState.max_player_hp
+	GameState.has_light_source = true
+	GameState.light_durability = light_dur_init
+	GameState.max_light_durability = max_light_dur_init
+	GameState.item_lore.clear()
+	get_tree().change_scene_to_file("res://scenes/TitleScreen.tscn")
