@@ -19,7 +19,7 @@ func load_lore_data():
 
 func generate_scout_lore():
 	if not lore_data.has("scouts"):
-		return "No lore data found."
+		return "No data found."
 		
 	var s = lore_data.scouts
 	var template = s.templates.pick_random()
@@ -34,6 +34,24 @@ func generate_scout_lore():
 		"personal_item": s.personal_items.pick_random(),
 		"regret": s.regrets.pick_random(),
 		"hometown_detail": s.hometown_details.pick_random()
+	})
+	return lore_text
+	
+	
+func generate_alien_lore():
+	if not lore_data.has("alien_corpses"):
+		return "The alien corpse is strange and unreadable."
+	
+	var a = lore_data.alien_corpses
+	var template = a.templates.pick_random()
+	
+	# Pick random components to fill into the template
+	var lore_text = template.format({
+		"body_part": a.body_parts.pick_random(),
+		"texture": a.textures.pick_random(),
+		"fluid_color": a.fluids.colors.pick_random(),
+		"fluid_type": a.fluids.types.pick_random(),
+		"smell": a.smells.pick_random()
 	})
 	
 	return lore_text

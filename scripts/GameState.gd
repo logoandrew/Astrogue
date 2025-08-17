@@ -5,13 +5,17 @@ signal hp_changed(current_hp, max_hp)
 signal score_changed(new_score)
 signal light_changed(current_durability, max_durability)
 
+const DEFAULT_MAX_HP = 10
+const DEFAULT_LIGHT_DURABILITY = 150
+const DEFAULT_MAX_LIGHT_DURABILITY = 210
+
 # --- Game State Variables with Setters ---
-var player_hp = 10:
+var player_hp = DEFAULT_MAX_HP:
 	set(new_hp):
 		player_hp = new_hp
 		hp_changed.emit(player_hp, max_player_hp)
 		
-var max_player_hp = 10:
+var max_player_hp = DEFAULT_MAX_HP:
 	set(new_max_hp):
 		max_player_hp = new_max_hp
 		hp_changed.emit(player_hp, max_player_hp)
@@ -21,7 +25,7 @@ var score = 0:
 		score = new_score
 		score_changed.emit(score)
 		
-var light_durability = 110:
+var light_durability = DEFAULT_LIGHT_DURABILITY:
 	set(new_durability):
 		light_durability = new_durability
 		light_changed.emit(light_durability, max_light_durability)
@@ -30,7 +34,8 @@ var light_durability = 110:
 var level = 1
 var high_scores = []
 var has_light_source = true
-var max_light_durability = 210
+var is_flickering = false
+var max_light_durability = DEFAULT_MAX_LIGHT_DURABILITY
 var item_lore = {}
 
 func _ready():
@@ -47,3 +52,14 @@ func save_high_scores():
 	if file:
 		file.store_var(high_scores)
 		file.close()
+
+func reset():
+	score = 0
+	level = 1
+	max_player_hp = DEFAULT_MAX_HP
+	player_hp = DEFAULT_MAX_HP
+	has_light_source = true
+	is_flickering = false
+	light_durability = DEFAULT_LIGHT_DURABILITY
+	max_light_durability = DEFAULT_LIGHT_DURABILITY
+	item_lore.clear()

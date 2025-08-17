@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="TileStats" load_steps=4 format=3 uid="uid://cl8fccdquje0v"]
+
+[ext_resource type="Script" uid="uid://dj88afc5sj20n" path="res://scripts/PickupEffect.gd" id="1_1eny6"]
+[ext_resource type="Script" uid="uid://d1qn254t6e6c6" path="res://scripts/TileStats.gd" id="2_87iao"]
+
+[sub_resource type="Resource" id="Resource_ugv0f"]
+script = ExtResource("1_1eny6")
+effect = ""
+value = 0
+message = {}
+metadata/_custom_type_script = "uid://dj88afc5sj20n"
+
+[resource]
+script = ExtResource("2_87iao")
+char = "%"
+color = Color(0.32549, 0, 0.560784, 1)
+is_item = true
+pickup_method = "manual"
+pickup_effect = SubResource("Resource_ugv0f")
+metadata/_custom_type_script = "uid://d1qn254t6e6c6"

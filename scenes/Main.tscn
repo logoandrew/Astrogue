@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://japyvpunvb26"]
+[gd_scene load_steps=13 format=3 uid="uid://japyvpunvb26"]
 
 [ext_resource type="Script" uid="uid://fugettr3tcxt" path="res://scripts/main.gd" id="1_c01mt"]
 [ext_resource type="Resource" uid="uid://bl6obrnxh8pyx" path="res://resources/player_stats.tres" id="2_jlsqs"]
@@ -10,6 +10,8 @@
 [ext_resource type="Resource" uid="uid://xn68co4xivlp" path="res://resources/tiles/hp_up.tres" id="8_bb450"]
 [ext_resource type="Resource" uid="uid://ckx8kiq681uru" path="res://resources/tiles/light.tres" id="9_nfivy"]
 [ext_resource type="PackedScene" uid="uid://72p55jbchb73" path="res://scenes/HUD.tscn" id="10_lhr70"]
+[ext_resource type="Resource" uid="uid://cfnv2algvgfyo" path="res://resources/tiles/acid.tres" id="10_wp0k4"]
+[ext_resource type="Resource" uid="uid://cl8fccdquje0v" path="res://resources/tiles/corpse.tres" id="11_bjd11"]
 
 [node name="Main" type="Node2D"]
 process_mode = 3
@@ -23,6 +25,9 @@ stairs_tile = ExtResource("6_cvmbd")
 health_tile = ExtResource("7_ft6cd")
 hp_up_tile = ExtResource("8_bb450")
 light_tile = ExtResource("9_nfivy")
+acid_tile = ExtResource("10_wp0k4")
+corpse_tile = ExtResource("11_bjd11")
+acid_damage_unit = 0.12
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 3.0
