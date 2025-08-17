@@ -36,8 +36,8 @@ func generate_scout_lore():
 		"hometown_detail": s.hometown_details.pick_random()
 	})
 	return lore_text
-	
-	
+
+
 func generate_alien_lore():
 	if not lore_data.has("alien_corpses"):
 		return "The alien corpse is strange and unreadable."

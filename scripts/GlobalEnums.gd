@@ -6,5 +6,4 @@ extends Node
 # using the name defined in the Project Settings (e.g., GlobalEnums.TileType).
 enum TileType { FLOOR, WALL, STAIRS, HEALTH, HP_UP, LIGHT, ACID, CORPSE }
 enum FogState { HIDDEN, KNOWN, VISIBLE }
-
 enum ActorType { PLAYER, ALIEN }

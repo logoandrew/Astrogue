@@ -4,12 +4,17 @@ var font = preload("res://assets/fonts/SpaceMono-Regular.ttf")
 var mini_tile_size = 2
 var hp_to_break_map = 5
 var main_node
+var map_node
 var frame_counter = 0
+
 
 func _ready():
 	main_node = get_node("/root/Main")
 	if main_node:
-		main_node.map_updated.connect(queue_redraw)
+		map_node = main_node.get_node("Map")
+		if map_node:
+			
+			map_node.map_updated.connect(queue_redraw)
 
 
 func _process(delta):
@@ -20,10 +25,9 @@ func _process(delta):
 
 
 func _draw():
-	if not main_node or not main_node.map_data or not main_node.player:
-		return # Don't draw if the main game isn't ready yet.
-
-	# Broken minimap
+	if not main_node or not map_node or not main_node.player:
+		return
+	
 	var broken_map_hp = randf_range(hp_to_break_map - 0.5, hp_to_break_map + 0.05)
 	if GameState.player_hp <= broken_map_hp:
 		var time = Time.get_ticks_msec()
@@ -37,25 +41,23 @@ func _draw():
 			draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color.RED)
 		return
 	
-	# Loop through the entire map grid.
-	for y in range(main_node.map_data.size()):
-		for x in range(main_node.map_data[y].size()):
-			var fog_state = main_node.fog_map[y][x]
+	for y in range(map_node.map_data.size()):
+		for x in range(map_node.map_data[y].size()):
+			var fog_state = map_node.fog_map[y][x]
 			
-			# Only draw tiles that are "known" or "visible".
 			if fog_state == GlobalEnums.FogState.KNOWN or fog_state == GlobalEnums.FogState.VISIBLE:
-				var tile_type = main_node.map_data[y][x]
+				var tile_type = map_node.map_data[y][x]
 				var tile_color
-
+				
 				if tile_type == GlobalEnums.TileType.WALL:
-					tile_color = Color(0.4, 0.4, 0.4) # Dim white
+					tile_color = Color(0.4, 0.4, 0.4)
 				elif tile_type == GlobalEnums.TileType.STAIRS:
 					tile_color = Color.MAGENTA
 				elif tile_type == GlobalEnums.TileType.HEALTH or tile_type == GlobalEnums.TileType.HP_UP or tile_type == GlobalEnums.TileType.LIGHT:
 					tile_color = Color.DARK_ORANGE
-				else: # Floor
-					tile_color = Color(0.25, 0.25, 0.25) # Dim gray
-
+				else:
+					tile_color = Color(0.25, 0.25, 0.25)
+				
 				var rect = Rect2(x * mini_tile_size, y * mini_tile_size, mini_tile_size, mini_tile_size)
 				draw_rect(rect, tile_color)
 	

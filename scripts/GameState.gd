@@ -38,8 +38,10 @@ var is_flickering = false
 var max_light_durability = DEFAULT_MAX_LIGHT_DURABILITY
 var item_lore = {}
 
+
 func _ready():
 	load_high_scores()
+
 
 func load_high_scores():
 	var file = FileAccess.open("user://highscores.dat", FileAccess.READ)
@@ -47,11 +49,13 @@ func load_high_scores():
 		high_scores = file.get_var()
 		file.close()
 
+
 func save_high_scores():
 	var file = FileAccess.open("user://highscores.dat", FileAccess.WRITE)
 	if file:
 		file.store_var(high_scores)
 		file.close()
+
 
 func reset():
 	score = 0

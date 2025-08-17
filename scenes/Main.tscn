@@ -1,7 +1,8 @@
-[gd_scene load_steps=13 format=3 uid="uid://japyvpunvb26"]
+[gd_scene load_steps=14 format=3 uid="uid://japyvpunvb26"]
 
 [ext_resource type="Script" uid="uid://fugettr3tcxt" path="res://scripts/main.gd" id="1_c01mt"]
 [ext_resource type="Resource" uid="uid://bl6obrnxh8pyx" path="res://resources/player_stats.tres" id="2_jlsqs"]
+[ext_resource type="PackedScene" uid="uid://di8mny13fylf4" path="res://scenes/Map.tscn" id="2_qmy6f"]
 [ext_resource type="Resource" uid="uid://cfibwqnsnfu82" path="res://resources/alien_stats.tres" id="3_q8u5g"]
 [ext_resource type="Resource" uid="uid://ctg3p67jwi1fp" path="res://resources/tiles/floor.tres" id="4_mwfav"]
 [ext_resource type="Resource" uid="uid://b3si3wwji02ya" path="res://resources/tiles/wall.tres" id="5_3p2gp"]
@@ -16,9 +17,11 @@
 [node name="Main" type="Node2D"]
 process_mode = 3
 script = ExtResource("1_c01mt")
+acid_damage_unit = 0.12
+
+[node name="Map" parent="." instance=ExtResource("2_qmy6f")]
 player_stats = ExtResource("2_jlsqs")
 alien_stats = ExtResource("3_q8u5g")
-tile_size = 22
 floor_tile = ExtResource("4_mwfav")
 wall_tile = ExtResource("5_3p2gp")
 stairs_tile = ExtResource("6_cvmbd")
@@ -27,7 +30,6 @@ hp_up_tile = ExtResource("8_bb450")
 light_tile = ExtResource("9_nfivy")
 acid_tile = ExtResource("10_wp0k4")
 corpse_tile = ExtResource("11_bjd11")
-acid_damage_unit = 0.12
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 3.0
