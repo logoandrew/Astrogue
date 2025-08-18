@@ -5,10 +5,10 @@
 
 [sub_resource type="Resource" id="Resource_ib4sa"]
 script = ExtResource("1_b0u1o")
-effect = "recharge_light"
-value = 0
+effect = "add_crystal"
+value = 1
 message = {
-"default": "You pick up a crystal and recharge your GLOW unit."
+"default": "You pick up a crystal."
 }
 metadata/_custom_type_script = "uid://dj88afc5sj20n"
 

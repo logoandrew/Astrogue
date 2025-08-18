@@ -29,6 +29,7 @@ func _ready():
 	# 3. Create the visual labels
 	map.create_map_tiles()
 	create_actor_labels()
+	map.start_glow_effect()
 	
 	# 4. Center the camera on the player
 	var player_pixel_pos = player["label"].position
@@ -40,6 +41,7 @@ func _ready():
 	map.map_updated.emit()
 	hud.quit_to_menu_requested.connect(_on_quit_to_menu_requested)
 	hud.high_score_submitted.connect(_on_high_score_submitted)
+	GameState.connect("inventory_changed", _on_inventory_changed)
 
 
 func _process(delta):
@@ -110,9 +112,18 @@ func try_move(dx, dy):
 	# Combat
 	if target_actor != null and target_actor != player:
 		shake_camera()
+		if GameState.melee_slot:
+			GameState.melee_slot_uses -= 1
+			if GameState.melee_slot_uses <= 0:
+				GameState.melee_slot = false
+				hud.log_message("Your melee crystal shatters!", Color.ORANGE_RED)
+				GameState.emit_signal("inventory_changed")
 		var hit_chance = randi_range(1, 100)
 		if hit_chance <= player["accuracy"]:
-			target_actor.hp -= 1
+			var current_damage = player.get("damage", 1)
+			if GameState.melee_slot:
+				current_damage += 2
+			target_actor.hp -= current_damage
 			target_actor.health_bar.value = target_actor.hp
 			hud.log_message("You hit the alien! It has " + str(target_actor.hp) + " HP left.", Color.ORANGE)
 			if target_actor.hp <= 0:
@@ -155,8 +166,6 @@ func try_move(dx, dy):
 			transitioning = true
 			GameState.score += 38 + (GameState.level * 2)
 			GameState.level += 1
-			if GameState.light_durability > 0:
-				GameState.has_light_source = true
 			hud.log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
 			await fade_to_black()
 			get_tree().reload_current_scene()
@@ -171,13 +180,14 @@ func try_move(dx, dy):
 				if GameState.player_hp <= 0:
 					player_death()
 	
-	if GameState.has_light_source and (dx != 0 or dy != 0):
+	if GameState.glow_slot and (dx != 0 or dy != 0):
 		if GameState.level != 1: GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
-			GameState.has_light_source = false
+			GameState.glow_slot = false
 			hud.log_message("Your GLOW unit flickers and goes dark!", Color.RED)
+			GameState.emit_signal("inventory_changed")
 	
-	if GameState.has_light_source:
+	if GameState.glow_slot:
 		var durability_percent = float(GameState.light_durability) / float(GameState.max_light_durability)
 		if durability_percent > 0.18:
 			$Timer.wait_time = 3.0
@@ -212,12 +222,18 @@ func apply_item_effect(tile_def):
 		GameState.player_hp += effect_data.value
 		hud.log_message(effect_data.message["default"], item_color)
 		
+	elif effect_type == "add_crystal":
+		GameState.crystal_inventory.append(randi_range(GameState.max_light_durability * 0.8, GameState.max_light_durability * 1.4))
+		hud.log_message(effect_data.message["default"], item_color)
+		GameState.emit_signal("inventory_changed")
+		
 	elif effect_type == "recharge_light":
-		GameState.has_light_source = true
-		GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.75, GameState.max_light_durability * 1.5)
+		GameState.glow_slot = true
+		GameState.max_light_durability = randi_range(GameState.max_light_durability * 0.8, GameState.max_light_durability * 1.4)
 		GameState.light_durability = GameState.max_light_durability
 		hud.log_message(effect_data.message["default"], item_color)
 		$Timer.wait_time = 3.0
+		GameState.emit_signal("inventory_changed")
 		
 	return true
 
@@ -355,7 +371,7 @@ func create_actor_labels():
 
 
 func _on_timer_timeout():
-	if GameState.has_light_source and not GameState.is_flickering:
+	if GameState.has_light_source() and not GameState.is_flickering:
 		var durability_percent = float(GameState.light_durability) / float(GameState.max_light_durability)
 		if GameState.level == 1: durability_percent = 0.7
 		var flicker_chance = 20 + (1.0 - durability_percent) * 60
@@ -367,7 +383,7 @@ func _on_timer_timeout():
 			await get_tree().create_timer(flicker_duration).timeout
 			GameState.is_flickering = false
 			if GameState.light_durability <= 0:
-				GameState.has_light_source = false
+				GameState.glow_slot = false
 			map.update_fog(player, actors)
 			map.map_updated.emit()
 
@@ -408,24 +424,24 @@ func examine_tile():
 		return
 	
 	if tile_type in map.examinable_tiles:
+		var message_to_display = ""
 		if tile_type == GlobalEnums.TileType.HP_UP:
 			pretext = "According to the spacesuit data...\n\n"
-			if GameState.item_lore.has(player_pos):
-				var lore_text = GameState.item_lore[player_pos]
-				message = pretext + str(lore_text)
-			else:
-				message = pretext + "The scout's corpse is too mangled to examine."
+			var lore_text = GameState.item_lore.get(player_pos, "The scout's corpse is too mangled to examine.")
+			message_to_display = pretext + lore_text
+			if GameState.corpse_has_crystal.has(player_pos) and not GameState.looted_corpses.has(player_pos):
+				GameState.crystal_inventory.append(randi_range(GameState.DEFAULT_LIGHT_DURABILITY * 0.8, GameState.DEFAULT_LIGHT_DURABILITY * 1.4))
+				GameState.emit_signal("inventory_changed")
+				GameState.looted_corpses[player_pos] = true
+				message_to_display += "\n\nYou find a [b][color=yellow]crystal![/color][/b]"
 		if tile_type == GlobalEnums.TileType.CORPSE:
 			pretext = "You examine the corpse...\n\n"
-			if GameState.item_lore.has(player_pos):
-				var lore_text = GameState.item_lore[player_pos]
-				message = pretext + str(lore_text)
-			else:
-				message = pretext + "The corpse is too mangled to examine."
-		hud.get_node("ExaminePanel/VBoxContainer/ExamineText").text = message
+			var lore_text = GameState.item_lore.get(player_pos, "The corpse is too mangled to examine.")
+			message_to_display = pretext + lore_text
+		hud.get_node("ExaminePanel/VBoxContainer/ExamineText").text = message_to_display
 		hud.get_node("ExaminePanel").show()
 	else:
-		hud.log_message(message, Color.GRAY)
+		hud.log_message("There is nothing to examine here.", Color.GRAY)
 
 
 func _on_high_score_submitted(player_tag):
@@ -449,3 +465,8 @@ func _on_quit_to_menu_requested():
 	get_tree().paused = false
 	GameState.reset()
 	get_tree().change_scene_to_file("res://scenes/TitleScreen.tscn")
+
+
+func _on_inventory_changed():
+	map.update_fog(player, actors)
+	map.map_updated.emit()

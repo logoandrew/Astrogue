@@ -114,7 +114,7 @@ Your objective is to serve as the sole infiltrator for the Astrogue unit. You wi
 
 SURVIVAL PROTOCOL:
 
-TERRAIN: The hive walls [b][#][/b] are impenetrable. Navigate the open floor corridors [b][.][/b]. Your suit's tactical display (bottom right) will automatically map all explored areas.
+TERRAIN & HAZARDS: The hive walls [b][#][/b] are impenetrable. Navigate the open floor corridors [b][.][/b]. Be advised: certain sectors contain pools of corrosive acid [b][~][/b] that will eat through your suit over time. Your suit's tactical display (bottom right) will automatically map all explored areas.
 
 MOVEMENT [b][UP, DOWN, LEFT, RIGHT][/b]: Standard suit movement. Proceed with extreme caution. Every step in the dark could be your last.
 
@@ -124,11 +124,15 @@ ARMOR SCRAPS [b][&][/b]: The previous expeditionary team was a total loss. Scave
 
 SYNTH-BANDAGES [b][+][/b]: Makeshift medical supplies. Use them to patch suit breaches and restore system integrity.
 
-ILLUMINATION:
+INVENTORY: Collect crystals [b][*][/b] by moving onto their tile. Manage your collected crystals in the inventory panel (center right).
 
-Your suit is equipped with a Geo-Luminescent Output Waveguide (GLOW) unit. This device utilizes scavenged and unstable crystal fragments [b][*][/b] to emit light.
+EQUIPPING:
 
-Be warned: The crystals degrade with use. The GLOW unit will flicker and fail as the crystal drains. Find new crystals to replenish your light.
+[i]GLOW SLOT[/i]: Your suit is equipped with a Geo-Luminescent Output Waveguide (GLOW) unit. Equip a crystal to activate your light. The crystal's energy will drain with every step you take.
+
+[i]MELEE SLOT[/i]: Equip a crystal to overcharge your melee actuators, granting a significant damage bonus. This charge is unstable and will burn out after a few attack attempts.
+
+Be warned: All crystals are finite and will be destroyed when their energy is depleted. Manage them wisely.
 
 THE HIVE:
 

@@ -11,6 +11,7 @@ signal map_updated
 @export_group("Map Generation")
 @export var tile_size = 24
 @export var level_transition = 2.0
+@export var corpse_crystal_chance = 20
 
 @export_group("Tile Definitions")
 @export var floor_tile: TileStats
@@ -68,7 +69,7 @@ func _initialize_tile_data():
 	tile_data[GlobalEnums.TileType.LIGHT] = light_tile
 	tile_data[GlobalEnums.TileType.ACID] = acid_tile
 	tile_data[GlobalEnums.TileType.CORPSE] = corpse_tile
-	grabbable_items = [GlobalEnums.TileType.HP_UP]
+	grabbable_items = [GlobalEnums.TileType.HP_UP, GlobalEnums.TileType.LIGHT]
 	examinable_tiles = [GlobalEnums.TileType.HP_UP, GlobalEnums.TileType.CORPSE]
 
 
@@ -156,6 +157,8 @@ func spawn_actors_and_items(actors):
 					map_data[py][px] = GlobalEnums.TileType.HP_UP
 					var item_position = Vector2(px, py)
 					GameState.item_lore[item_position] = LoreManager.generate_scout_lore()
+					if randi_range(1, 100) <= corpse_crystal_chance:
+						GameState.corpse_has_crystal[item_position] = true
 					hp_placed = true
 				placement_attempts += 1
 	
@@ -264,7 +267,7 @@ func update_fog(player, actors):
 				fog_map[y][x] = GlobalEnums.FogState.KNOWN
 	
 	var vision_radius = 2.5 # Default small radius for dark mode
-	if GameState.has_light_source:
+	if GameState.has_light_source():
 		vision_radius = 5 # Larger radius if we have a light
 	
 	var player_pos = Vector2(player["x"], player["y"])
@@ -281,7 +284,7 @@ func update_fog(player, actors):
 			var fog_state = fog_map[y][x]
 			var tile_node = tile_nodes[y][x]
 			var tile_type = map_data[y][x]
-			var is_dark = not GameState.has_light_source or GameState.is_flickering
+			var is_dark = not GameState.has_light_source() or GameState.is_flickering
 			
 			if fog_state == GlobalEnums.FogState.VISIBLE:
 				if tile_data.has(tile_type):
@@ -308,7 +311,7 @@ func update_fog(player, actors):
 	for actor in actors:
 		var fog_state = fog_map[actor["y"]][actor["x"]]
 		var actor_pos = Vector2(actor["x"], actor["y"])
-		var is_dark = not GameState.has_light_source or GameState.is_flickering
+		var is_dark = not GameState.has_light_source() or GameState.is_flickering
 		
 		if fog_state == GlobalEnums.FogState.VISIBLE:
 			if is_dark and actor != player:

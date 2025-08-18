@@ -6,3 +6,4 @@ extends Resource
 @export var color: Color = Color.WHITE
 @export var hp: int = 10
 @export var accuracy: int = 80
+@export var damage: int = 1
