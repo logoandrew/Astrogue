@@ -6,7 +6,8 @@
 script = ExtResource("1_wld0n")
 actor_type = 0
 char = "@"
-color = Color(0, 1, 1, 1)
+color = Color(0.388235, 0.988235, 0.960784, 1)
 hp = 10
 accuracy = 80
+damage = 1
 metadata/_custom_type_script = "uid://i1it2k6f8d46"

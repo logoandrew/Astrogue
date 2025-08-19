@@ -23,8 +23,8 @@ LoreManager="*res://scripts/LoreManager.gd"
 
 [display]
 
-window/size/viewport_width=2500
-window/size/viewport_height=1500
+window/size/viewport_width=2000
+window/size/viewport_height=1125
 window/stretch/scale=2.5
 
 [input]
@@ -49,4 +49,4 @@ grab={
 
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0, 0, 0, 1)
+environment/defaults/default_clear_color=Color(0.0784314, 0.027451, 0.0862745, 1)

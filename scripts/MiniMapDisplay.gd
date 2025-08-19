@@ -38,7 +38,7 @@ func _draw():
 			var center_pos = get_parent().size / 2
 			var text_pos = center_pos - (text_size / 2)
 			text_pos.y += 9
-			draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color.RED)
+			draw_string(font, text_pos, text, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, Color("#D90E33"))
 		return
 	
 	for y in range(map_node.map_data.size()):
@@ -50,13 +50,13 @@ func _draw():
 				var tile_color
 				
 				if tile_type == GlobalEnums.TileType.WALL:
-					tile_color = Color(0.4, 0.4, 0.4)
+					tile_color = Color("#7C5D7A")
 				elif tile_type == GlobalEnums.TileType.STAIRS:
-					tile_color = Color.MAGENTA
+					tile_color = Color("#FF7F0A")
 				elif tile_type == GlobalEnums.TileType.HEALTH or tile_type == GlobalEnums.TileType.HP_UP or tile_type == GlobalEnums.TileType.LIGHT:
-					tile_color = Color.DARK_ORANGE
+					tile_color = Color("#FF2FF1")
 				else:
-					tile_color = Color(0.25, 0.25, 0.25)
+					tile_color = Color("#4C3050")
 				
 				var rect = Rect2(x * mini_tile_size, y * mini_tile_size, mini_tile_size, mini_tile_size)
 				draw_rect(rect, tile_color)
@@ -64,6 +64,6 @@ func _draw():
 	if main_node.player:
 		var player_x = main_node.player["x"]
 		var player_y = main_node.player["y"]
-		var player_color = Color.LAWN_GREEN
+		var player_color = Color("#72F500")
 		var rect = Rect2(player_x * mini_tile_size, player_y * mini_tile_size, mini_tile_size, mini_tile_size)
 		draw_rect(rect, player_color)

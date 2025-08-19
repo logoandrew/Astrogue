@@ -195,7 +195,6 @@ func spawn_actors_and_items(actors):
 
 
 	var acid_to_place = randi_range(10 + GameState.level * 10, 100 + GameState.level * 10)
-	print(str(acid_to_place))
 	var acid_attempts = 0
 	var max_acid_attempts = acid_to_place * 20
 	while acid_to_place > 0 and acid_attempts < max_acid_attempts:
@@ -244,7 +243,7 @@ func create_map_tiles():
 				new_tile.text = tile_data[GlobalEnums.TileType.FLOOR].char
 				
 			if tile_type == GlobalEnums.TileType.LIGHT:
-				new_tile.add_theme_color_override("font_shadow_color", Color(1, 1, 0, 0))
+				new_tile.add_theme_color_override("font_shadow_color", Color("#FACD0000"))
 				new_tile.add_theme_constant_override("shadow_outline_size", 12)
 				new_tile.add_theme_constant_override("shadow_offset_x", 0)
 				new_tile.add_theme_constant_override("shadow_offset_y", 0)
@@ -267,7 +266,7 @@ func update_fog(player, actors):
 				fog_map[y][x] = GlobalEnums.FogState.KNOWN
 	
 	var vision_radius = 2.5 # Default small radius for dark mode
-	if GameState.has_light_source():
+	if GameState.has_light_source() and not GameState.is_flickering:
 		vision_radius = 5 # Larger radius if we have a light
 	
 	var player_pos = Vector2(player["x"], player["y"])
@@ -294,18 +293,18 @@ func update_fog(player, actors):
 							tile_node.modulate = color
 						else:
 							var brightness = color.v / 2.5
-							tile_node.modulate = Color(brightness, brightness, brightness)
+							tile_node.modulate = Color("#7C5D7A")
 					else:
 						tile_node.modulate = color
 			
 			elif fog_state == GlobalEnums.FogState.KNOWN:
 				if tile_type == GlobalEnums.TileType.LIGHT:
-					tile_node.modulate = tile_data[tile_type].color * Color(0.5, 0.5, 0.5)
+					tile_node.modulate = tile_data[tile_type].color * Color("#3D283E")
 				else:
-					tile_node.modulate = Color(0.2, 0.2, 0.2)
+					tile_node.modulate = Color("#3D283E")
 			
 			else: # Hidden
-				tile_node.modulate = Color(0, 0, 0)
+				tile_node.modulate = Color("#140716")
 	
 	# --- PART 3: Update actor visuals ---
 	for actor in actors:
@@ -358,5 +357,5 @@ func start_glow_effect():
 				var crystal_label = tile_nodes[y][x]
 				var tween = create_tween()
 				tween.set_loops()
-				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color(1, 1, 0, 0.3), 1.5).set_trans(Tween.TRANS_SINE)
-				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color(1, 1, 0, 0), 1.5).set_trans(Tween.TRANS_SINE)
+				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color("#FACD004D"), 1.5).set_trans(Tween.TRANS_SINE)
+				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color("#FACD0000"), 1.5).set_trans(Tween.TRANS_SINE)

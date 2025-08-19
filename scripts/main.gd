@@ -42,6 +42,8 @@ func _ready():
 	hud.quit_to_menu_requested.connect(_on_quit_to_menu_requested)
 	hud.high_score_submitted.connect(_on_high_score_submitted)
 	GameState.connect("inventory_changed", _on_inventory_changed)
+	
+	fade_from_black()
 
 
 func _process(delta):
@@ -88,11 +90,11 @@ func _draw():
 	var grid_range = 50
 	for i in range(-grid_range, grid_range + 1):
 		var x = i * map.tile_size
-		draw_line(Vector2(x, -grid_range * map.tile_size), Vector2(x, grid_range * map.tile_size), Color(0.1, 0.1, 0.1))
+		draw_line(Vector2(x, -grid_range * map.tile_size), Vector2(x, grid_range * map.tile_size), Color("#311F32"))
 	
 	for i in range(-grid_range, grid_range + 1):
 		var y = i * map.tile_size
-		draw_line(Vector2(-grid_range * map.tile_size, y), Vector2(grid_range * map.tile_size, y), Color(0.1, 0.1, 0.1))
+		draw_line(Vector2(-grid_range * map.tile_size, y), Vector2(grid_range * map.tile_size, y), Color("#311F32"))
 
 
 func get_actor_at(x, y):
@@ -116,7 +118,7 @@ func try_move(dx, dy):
 			GameState.melee_slot_uses -= 1
 			if GameState.melee_slot_uses <= 0:
 				GameState.melee_slot = false
-				hud.log_message("Your melee crystal shatters!", Color.ORANGE_RED)
+				hud.log_message("Your melee crystal shatters!", Color("#D90E33"))
 				GameState.emit_signal("inventory_changed")
 		var hit_chance = randi_range(1, 100)
 		if hit_chance <= player["accuracy"]:
@@ -125,11 +127,11 @@ func try_move(dx, dy):
 				current_damage += 2
 			target_actor.hp -= current_damage
 			target_actor.health_bar.value = target_actor.hp
-			hud.log_message("You hit the alien! It has " + str(target_actor.hp) + " HP left.", Color.ORANGE)
+			hud.log_message("You hit the alien! It has " + str(target_actor.hp) + " HP left.", Color("#F1F1E3"))
 			if target_actor.hp <= 0:
 				kill_actor(target_actor)
 		else:
-			hud.log_message("You swing at the alien and miss!", Color.GRAY)
+			hud.log_message("You swing at the alien and miss!", Color("#B4ACA6"))
 	# Non-combat
 	elif target_tile_type != GlobalEnums.TileType.WALL:
 		var tile_def = map.tile_data.get(target_tile_type)
@@ -166,17 +168,17 @@ func try_move(dx, dy):
 			transitioning = true
 			GameState.score += 38 + (GameState.level * 2)
 			GameState.level += 1
-			hud.log_message("You descend to level " + str(GameState.level) + "!", Color.GOLD)
+			hud.log_message("You descend to level " + str(GameState.level) + "!", Color("#FACD00"))
 			await fade_to_black()
 			get_tree().reload_current_scene()
 			
 		if target_tile_type == GlobalEnums.TileType.ACID:
 			acid_damage += acid_damage_unit
-			hud.log_message("The acid eats at your spacesuit.", Color.GRAY)
+			hud.log_message("The acid eats at your spacesuit.", Color("#B4ACA6"))
 			if acid_damage >= 1.0:
 				GameState.player_hp -= 1
 				acid_damage -= 1.0
-				hud.log_message("You take acid damage!", Color.GREEN_YELLOW)
+				hud.log_message("You take acid damage!", Color("#D90E33"))
 				if GameState.player_hp <= 0:
 					player_death()
 	
@@ -184,7 +186,7 @@ func try_move(dx, dy):
 		if GameState.level != 1: GameState.light_durability -= 1
 		if GameState.light_durability <= 0:
 			GameState.glow_slot = false
-			hud.log_message("Your GLOW unit flickers and goes dark!", Color.RED)
+			hud.log_message("Your GLOW unit flickers and goes dark!", Color("#D90E33"))
 			GameState.emit_signal("inventory_changed")
 	
 	if GameState.glow_slot:
@@ -253,7 +255,7 @@ func pickup_item():
 		else:
 			return false
 	else:
-		hud.log_message("There is nothing here to pick up.", Color.GRAY)
+		hud.log_message("There is nothing here to pick up.", Color("#B4ACA6"))
 		return false
 
 
@@ -287,11 +289,11 @@ func enemy_take_turn(actor):
 			var hit_chance = randi_range(1, 100)
 			if hit_chance <= actor["accuracy"] + GameState.level:
 				GameState.player_hp -= 1
-				hud.log_message("The alien attacks you! You have " + str(GameState.player_hp) + " HP left.", Color.RED)
+				hud.log_message("The alien attacks you! You have " + str(GameState.player_hp) + " HP left.", Color("#D90E33"))
 				if GameState.player_hp <= 0:
 					player_death()
 			else:
-				hud.log_message("The alien lunges at you and misses!", Color.GRAY)
+				hud.log_message("The alien lunges at you and misses!", Color("#B4ACA6"))
 		elif target_tile_type in walkable_tiles and not get_actor_at(target_x, target_y):
 			actor["x"] = target_x
 			actor["y"] = target_y
@@ -306,7 +308,7 @@ func enemy_take_turn(actor):
 
 
 func kill_actor(actor):
-	hud.log_message("The alien is defeated!", Color.LIGHT_GREEN)
+	hud.log_message("The alien is defeated!", Color("#FACD00"))
 	GameState.score += 9 + GameState.level
 	var actor_pos = Vector2(actor.x, actor.y)
 	map.map_data[actor_pos.y][actor_pos.x] = GlobalEnums.TileType.CORPSE
@@ -320,15 +322,15 @@ func kill_actor(actor):
 
 func player_death():
 	game_over = true
-	hud.log_message("You have been defeated!", Color.DARK_RED)
+	hud.log_message("You have been defeated!", Color("#D90E33"))
 	is_player_turn = false
 	
 	if is_high_score():
 		hud.get_node("EnterHighScorePanel").show()
 	else:
 		get_tree().paused = true
-		hud.log_message("--- GAME OVER ---", Color.WHITE)
-		hud.log_message("Press [R] to restart", Color.GRAY)
+		hud.log_message("--- GAME OVER ---", Color("#F1F1E3"))
+		hud.log_message("Press [R] to restart", Color("#B4ACA6"))
 
 
 func shake_camera():
@@ -355,7 +357,7 @@ func create_actor_labels():
 			enemy_health_bar.size = Vector2(map.tile_size, 5)
 			enemy_health_bar.position = Vector2(0, -8)
 			var style_box = StyleBoxFlat.new()
-			style_box.bg_color = Color.RED
+			style_box.bg_color = Color("#D90E33")
 			enemy_health_bar.add_theme_stylebox_override("fill", style_box)
 			enemy_health_bar.show_percentage = false
 			enemy_health_bar.scale = Vector2(1, 0.1)
@@ -398,18 +400,19 @@ func is_high_score():
 
 
 func fade_to_black():
+	transitioning = true
 	var tween = create_tween()
-	tween.tween_property(hud.get_node("FadeOverlay"), "modulate", Color(1, 1, 1, 1), map.level_transition)
+	tween.tween_property(hud.get_node("FadeOverlay"), "modulate", Color("#140716FF"), map.level_transition)
 	await tween.finished
 
 
 func fade_from_black():
 	var tween = create_tween()
 	var fadein = map.level_transition * 0.3
-	hud.get_node("FadeOverlay").modulate = Color(1, 1, 1, 1)
-	tween.tween_property(hud.get_node("FadeOverlay"), "modulate", Color(1, 1, 1, 0), fadein)
+	hud.get_node("FadeOverlay").modulate = Color("#140716FF")
+	tween.tween_property(hud.get_node("FadeOverlay"), "modulate", Color("#14071600"), fadein)
 	await tween.finished
-	hud.get_node("FadeOverlay").modulate = Color(1, 1, 1, 0)
+	hud.get_node("FadeOverlay").modulate = Color("#14071600")
 	transitioning = false
 
 
@@ -433,7 +436,7 @@ func examine_tile():
 				GameState.crystal_inventory.append(randi_range(GameState.DEFAULT_LIGHT_DURABILITY * 0.8, GameState.DEFAULT_LIGHT_DURABILITY * 1.4))
 				GameState.emit_signal("inventory_changed")
 				GameState.looted_corpses[player_pos] = true
-				message_to_display += "\n\nYou find a [b][color=yellow]crystal![/color][/b]"
+				message_to_display += "\n\nYou find a [b][color=#FACD00]crystal![/color][/b]"
 		if tile_type == GlobalEnums.TileType.CORPSE:
 			pretext = "You examine the corpse...\n\n"
 			var lore_text = GameState.item_lore.get(player_pos, "The corpse is too mangled to examine.")
@@ -441,7 +444,7 @@ func examine_tile():
 		hud.get_node("ExaminePanel/VBoxContainer/ExamineText").text = message_to_display
 		hud.get_node("ExaminePanel").show()
 	else:
-		hud.log_message("There is nothing to examine here.", Color.GRAY)
+		hud.log_message("There is nothing to examine here.", Color("#B4ACA6"))
 
 
 func _on_high_score_submitted(player_tag):
@@ -456,8 +459,8 @@ func _on_high_score_submitted(player_tag):
 		GameState.high_scores.resize(10)
 	GameState.save_high_scores()
 	get_tree().paused = true
-	hud.log_message("--- GAME OVER ---", Color.WHITE)
-	hud.log_message("Press [R] to restart", Color.GRAY)
+	hud.log_message("--- GAME OVER ---", Color("#F1F1E3"))
+	hud.log_message("Press [R] to restart", Color("#B4ACA6"))
 
 
 func _on_quit_to_menu_requested():

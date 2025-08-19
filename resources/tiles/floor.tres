@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_ocpmn")
 char = "."
-color = Color(0.627451, 0.12549, 0.941176, 1)
+color = Color(0.662745, 0, 0.898039, 1)
 is_item = false
 pickup_method = ""
 metadata/_custom_type_script = "uid://d1qn254t6e6c6"

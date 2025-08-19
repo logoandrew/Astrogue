@@ -7,12 +7,12 @@
 [ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://assets/fonts/SpaceMono-Bold.ttf" id="5_w20ru"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fnlyl"]
-bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
 expand_margin_left = 20.0
 expand_margin_top = 20.0
 expand_margin_right = 20.0
 expand_margin_bottom = 20.0
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
+shadow_color = Color(0.709804, 0, 0.905882, 0.235294)
 shadow_size = 35
 
 [node name="TitleScreen" type="Control"]
@@ -33,6 +33,7 @@ offset_left = -44.5
 offset_right = 44.5
 offset_bottom = 23.0
 grow_horizontal = 2
+theme_override_colors/font_color = Color(0.945098, 0.945098, 0.890196, 1)
 theme_override_fonts/font = ExtResource("2_85feu")
 theme_override_font_sizes/font_size = 48
 text = "ASTROGUE!"

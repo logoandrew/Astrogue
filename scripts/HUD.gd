@@ -30,10 +30,10 @@ func _ready():
 	GameState.score_changed.connect(_on_score_changed)
 	_on_hp_changed(GameState.player_hp, GameState.max_player_hp)
 	
-	equipped_stylebox.bg_color = Color.DARK_GREEN
+	equipped_stylebox.bg_color = Color("#2E701E")
 	equipped_stylebox.set_corner_radius_all(5)
 	default_stylebox = glow_equip_btn.get_theme_stylebox("normal")
-	equipped_stylebox_hover.bg_color = Color.CRIMSON
+	equipped_stylebox_hover.bg_color = Color("#D90E33")
 	equipped_stylebox_hover.set_corner_radius_all(5)
 	default_stylebox_hover = glow_equip_btn.get_theme_stylebox("hover")
 	
@@ -71,7 +71,7 @@ func _update_health_label():
 	health_label.text = "HP: " + str(GameState.player_hp) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(top_score) + "  |  Level: " + str(GameState.level)
 
 
-func log_message(message, color = Color.WHITE):
+func log_message(message, color = Color("#F1F1E3")):
 	message_history.append({ "text": message, "color": color })
 	if message_history.size() > 10:
 		message_history.pop_front()
@@ -135,7 +135,6 @@ func _on_glow_equip_pressed():
 		GameState.crystal_inventory.push_front(GameState.light_durability)
 		GameState.light_durability = 0
 	elif not GameState.crystal_inventory.is_empty(): # Add
-		print("function triggered")
 		GameState.glow_slot = true
 		GameState.light_durability = GameState.crystal_inventory.pop_front()
 		log_message("You add a crystal to your GLOW unit.")
@@ -146,7 +145,7 @@ func _on_glow_equip_pressed():
 
 func _on_melee_equip_pressed():
 	if GameState.melee_slot: # Remove
-		log_message("Crystal cannot be removed.")
+		log_message("Crystal cannot be removed from melee unit.")
 	if not GameState.crystal_inventory.is_empty(): # Add
 		GameState.melee_slot = true
 		GameState.crystal_inventory.pop_front()

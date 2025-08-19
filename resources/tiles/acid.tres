@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_2at5s")
 char = "~"
-color = Color(0.402663, 0.488023, 0.798069, 1)
+color = Color(0.443137, 0.247059, 0.776471, 1)
 is_item = false
 pickup_method = ""
 metadata/_custom_type_script = "uid://d1qn254t6e6c6"

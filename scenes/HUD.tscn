@@ -11,29 +11,29 @@
 bg_color = Color(0.129412, 0.713726, 0.243137, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f6qnu"]
-bg_color = Color(0.0274091, 0.0274092, 0.0274091, 1)
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
 expand_margin_left = 10.0
 expand_margin_top = 10.0
 expand_margin_right = 10.0
 expand_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ljw04"]
-bg_color = Color(0.0588235, 0.0588235, 0.0588235, 1)
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
 expand_margin_left = 20.0
 expand_margin_top = 20.0
 expand_margin_right = 20.0
 expand_margin_bottom = 20.0
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
+shadow_color = Color(0.709804, 0, 0.905882, 0.235294)
 shadow_size = 35
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_467v5"]
-bg_color = Color(0.0605303, 0.0605303, 0.0605303, 1)
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
+shadow_color = Color(0.709804, 0, 0.905882, 0.235294)
 shadow_size = 35
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_natmc"]
-bg_color = Color(0.0497766, 0.0497767, 0.0497766, 1)
-shadow_color = Color(0.627451, 0.121569, 0.941176, 0.235294)
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
+shadow_color = Color(0.709804, 0, 0.905882, 0.235294)
 shadow_size = 35
 
 [node name="HUD" type="CanvasLayer"]
@@ -47,7 +47,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 1)
 
 [node name="HealthLabel" type="Label" parent="."]
 anchors_preset = 5
@@ -104,28 +103,30 @@ offset_left = -104.0
 offset_top = -104.0
 grow_horizontal = 0
 grow_vertical = 0
-color = Color(0.0943044, 0.0943044, 0.0943043, 1)
+color = Color(0.129412, 0.0509804, 0.129412, 1)
 
 [node name="MiniMapDisplay" type="Node2D" parent="MiniMapBG"]
 script = ExtResource("6_meimr")
 
 [node name="InventoryPanel" type="Panel" parent="."]
-custom_minimum_size = Vector2(100, 200)
+custom_minimum_size = Vector2(100, 250)
 anchors_preset = 6
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = -40.0
-offset_top = -20.0
-offset_bottom = 20.0
+offset_left = -100.0
+offset_top = -125.0
+offset_right = 10.0
+offset_bottom = 125.0
 grow_horizontal = 0
 grow_vertical = 2
 scale = Vector2(0.8, 0.8)
+pivot_offset = Vector2(21, 0)
 theme_override_styles/panel = SubResource("StyleBoxFlat_f6qnu")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="InventoryPanel"]
-custom_minimum_size = Vector2(100, 200)
+custom_minimum_size = Vector2(110, 200)
 layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0

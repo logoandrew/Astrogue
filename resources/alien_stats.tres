@@ -6,7 +6,8 @@
 script = ExtResource("1_ckrae")
 actor_type = 1
 char = "A"
-color = Color(0.564706, 0.933333, 0.564706, 1)
+color = Color(0.498039, 0.870588, 0.423529, 1)
 hp = 3
 accuracy = 32
+damage = 1
 metadata/_custom_type_script = "uid://i1it2k6f8d46"
