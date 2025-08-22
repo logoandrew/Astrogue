@@ -6,7 +6,7 @@
 script = ExtResource("1_wld0n")
 actor_type = 0
 char = "@"
-color = Color(0.388235, 0.988235, 0.960784, 1)
+color_name = "COLOR_ACTOR_PLAYER"
 hp = 10
 accuracy = 80
 damage = 1

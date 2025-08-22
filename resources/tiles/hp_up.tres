@@ -15,7 +15,8 @@ metadata/_custom_type_script = "uid://dj88afc5sj20n"
 [resource]
 script = ExtResource("1_d8763")
 char = "&"
-color = Color(0.133333, 0.54902, 0.380392, 1)
+color = Color(1, 1, 1, 1)
+color_name = "COLOR_TILE_HP_UP"
 is_item = true
 pickup_method = "manual"
 pickup_effect = SubResource("Resource_ugv0f")

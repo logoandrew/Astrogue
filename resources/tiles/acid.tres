@@ -5,7 +5,8 @@
 [resource]
 script = ExtResource("1_2at5s")
 char = "~"
-color = Color(0.443137, 0.247059, 0.776471, 1)
+color = Color(1, 1, 1, 1)
+color_name = "COLOR_TILE_ACID"
 is_item = false
 pickup_method = ""
 metadata/_custom_type_script = "uid://d1qn254t6e6c6"

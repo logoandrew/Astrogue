@@ -5,7 +5,7 @@
 [resource]
 script = ExtResource("1_y8h54")
 char = ">"
-color = Color(1, 0.498039, 0.0392157, 1)
+color_name = "COLOR_TILE_STAIRS"
 is_item = false
 pickup_method = ""
 metadata/_custom_type_script = "uid://d1qn254t6e6c6"

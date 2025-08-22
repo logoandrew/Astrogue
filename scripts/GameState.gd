@@ -69,6 +69,22 @@ func has_light_source():
 	return glow_slot and light_durability > 0
 
 
+func _update_color(color_name):
+	var design_system_script = DesignSystem.get_script()
+	var color = Color.WHITE
+	if design_system_script:
+		var constant_map = design_system_script.get_script_constant_map()
+		if constant_map.has(color_name):
+			color = DesignSystem.get(color_name)
+			return color
+		else:
+			printerr("Color name '%s' not found in DesignSystem constants" % color_name)
+			return color
+	else:
+		printerr("DesignSystem autoload script not found.")
+		return color
+
+
 func reset():
 	score = 0
 	level = 1

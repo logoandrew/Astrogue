@@ -13,7 +13,8 @@ metadata/_custom_type_script = "uid://dj88afc5sj20n"
 [resource]
 script = ExtResource("2_87iao")
 char = "%"
-color = Color(0.403922, 0.101961, 0.580392, 1)
+color = Color(1, 1, 1, 1)
+color_name = "COLOR_TILE_CORPSE"
 is_item = true
 pickup_method = "manual"
 pickup_effect = SubResource("Resource_ugv0f")

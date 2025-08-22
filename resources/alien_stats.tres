@@ -6,7 +6,7 @@
 script = ExtResource("1_ckrae")
 actor_type = 1
 char = "A"
-color = Color(0.498039, 0.870588, 0.423529, 1)
+color_name = "COLOR_ACTOR_ALIEN"
 hp = 3
 accuracy = 32
 damage = 1
