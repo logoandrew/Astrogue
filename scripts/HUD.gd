@@ -150,7 +150,7 @@ func _on_glow_equip_pressed():
 func _on_melee_equip_pressed():
 	if GameState.melee_slot: # Remove
 		log_message("Crystal cannot be removed from melee unit.")
-	if not GameState.crystal_inventory.is_empty(): # Add
+	elif not GameState.crystal_inventory.is_empty(): # Add
 		GameState.melee_slot = true
 		GameState.crystal_inventory.pop_front()
 		GameState.melee_slot_uses = GameState.MAX_MELEE_SLOT_USES
