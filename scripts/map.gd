@@ -49,7 +49,7 @@ var fog_map = []
 var tile_nodes = []
 var map_data = []
 
-var tile_font = preload("res://assets/fonts/SpaceMono-Regular.ttf")
+var tile_font = preload(DesignSystem.FONT_TILES)
 var grabbable_items = []
 var examinable_tiles = []
 
@@ -243,7 +243,9 @@ func create_map_tiles():
 				new_tile.text = tile_data[GlobalEnums.TileType.FLOOR].char
 				
 			if tile_type == GlobalEnums.TileType.LIGHT:
-				new_tile.add_theme_color_override("font_shadow_color", Color("#FACD0000"))
+				var fnt_shadow_color = DesignSystem.COLOR_ACCENT
+				fnt_shadow_color.a = 0.0
+				new_tile.add_theme_color_override("font_shadow_color", fnt_shadow_color)
 				new_tile.add_theme_constant_override("shadow_outline_size", 12)
 				new_tile.add_theme_constant_override("shadow_offset_x", 0)
 				new_tile.add_theme_constant_override("shadow_offset_y", 0)
@@ -293,18 +295,18 @@ func update_fog(player, actors):
 							tile_node.modulate = color
 						else:
 							var brightness = color.v / 2.5
-							tile_node.modulate = Color("#7C5D7A")
+							tile_node.modulate = DesignSystem.COLOR_MINIMAP_WALL
 					else:
 						tile_node.modulate = color
 			
 			elif fog_state == GlobalEnums.FogState.KNOWN:
 				if tile_type == GlobalEnums.TileType.LIGHT:
-					tile_node.modulate = tile_data[tile_type].color * Color("#3D283E")
+					tile_node.modulate = tile_data[tile_type].color * DesignSystem.COLOR_FOG_KNOWN_LIGHT
 				else:
-					tile_node.modulate = Color("#3D283E")
+					tile_node.modulate = DesignSystem.COLOR_FOG_KNOWN_LIGHT
 			
 			else: # Hidden
-				tile_node.modulate = Color("#140716")
+				tile_node.modulate = DesignSystem.COLOR_NEAR_BLACK
 	
 	# --- PART 3: Update actor visuals ---
 	for actor in actors:
@@ -356,6 +358,9 @@ func start_glow_effect():
 			if map_data[y][x] == GlobalEnums.TileType.LIGHT:
 				var crystal_label = tile_nodes[y][x]
 				var tween = create_tween()
+				var fnt_shadow_color = DesignSystem.COLOR_ACCENT
 				tween.set_loops()
-				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color("#FACD004D"), 1.5).set_trans(Tween.TRANS_SINE)
-				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", Color("#FACD0000"), 1.5).set_trans(Tween.TRANS_SINE)
+				fnt_shadow_color.a = 0.3
+				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", fnt_shadow_color, 1.5).set_trans(Tween.TRANS_SINE)
+				fnt_shadow_color.a = 0.0
+				tween.tween_property(crystal_label, "theme_override_colors/font_shadow_color", fnt_shadow_color, 1.5).set_trans(Tween.TRANS_SINE)

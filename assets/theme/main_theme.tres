@@ -1,3 +1,34 @@
-[gd_resource type="Theme" format=3 uid="uid://dj8abbrgvxi5h"]
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://dj8abbrgvxi5h"]
+
+[ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://assets/fonts/ShareTechMono-Regular.ttf" id="1_xxxxx"]
+
+[sub_resource type="StyleBoxFlat" id="button_hover"]
+bg_color = Color(1, 1, 1, 0.4)
+
+[sub_resource type="StyleBoxFlat" id="button_default"]
+bg_color = Color(0.8, 0.8, 0.8, 0.2)
+
+[sub_resource type="StyleBoxFlat" id="inventory_panel"]
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
+expand_margin_left = 10.0
+expand_margin_top = 10.0
+expand_margin_right = 10.0
+expand_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxFlat" id="popup_panel"]
+bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
+expand_margin_left = 20.0
+expand_margin_top = 20.0
+expand_margin_right = 20.0
+expand_margin_bottom = 20.0
+shadow_color = Color(0.709804, 0, 0.905882, 0.235294)
+shadow_size = 35
 
 [resource]
+default_font = ExtResource("1_xxxxx")
+Button/styles/hover = SubResource("button_hover")
+Button/styles/normal = SubResource("button_default")
+InventoryPanel/base_type = &"PanelContainer"
+InventoryPanel/styles/panel = SubResource("inventory_panel")
+Panel/styles/panel = SubResource("popup_panel")
+PanelContainer/styles/panel = SubResource("popup_panel")

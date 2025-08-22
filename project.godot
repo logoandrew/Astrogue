@@ -20,12 +20,18 @@ config/icon="res://assets/icons/icon.svg"
 GameState="*res://scripts/GameState.gd"
 GlobalEnums="*res://scripts/GlobalEnums.gd"
 LoreManager="*res://scripts/LoreManager.gd"
+DesignSystem="*res://scripts/DesignSystem.gd"
 
 [display]
 
 window/size/viewport_width=2000
 window/size/viewport_height=1125
 window/stretch/scale=2.5
+
+[gui]
+
+theme/custom="uid://dj8abbrgvxi5h"
+theme/custom_font="uid://baxrq1x64p2ip"
 
 [input]
 

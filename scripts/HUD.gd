@@ -30,11 +30,11 @@ func _ready():
 	GameState.score_changed.connect(_on_score_changed)
 	_on_hp_changed(GameState.player_hp, GameState.max_player_hp)
 	
-	equipped_stylebox.bg_color = Color("#2E701E")
-	equipped_stylebox.set_corner_radius_all(5)
+	equipped_stylebox.bg_color = DesignSystem.COLOR_SUCCESS
+	equipped_stylebox.set_corner_radius_all(DesignSystem.SIZE_2XS)
 	default_stylebox = glow_equip_btn.get_theme_stylebox("normal")
-	equipped_stylebox_hover.bg_color = Color("#D90E33")
-	equipped_stylebox_hover.set_corner_radius_all(5)
+	equipped_stylebox_hover.bg_color = DesignSystem.COLOR_DANGER
+	equipped_stylebox_hover.set_corner_radius_all(DesignSystem.SIZE_2XS)
 	default_stylebox_hover = glow_equip_btn.get_theme_stylebox("hover")
 	
 	GameState.connect("inventory_changed", _on_inventory_changed)
@@ -71,7 +71,7 @@ func _update_health_label():
 	health_label.text = "HP: " + str(GameState.player_hp) + " / " + str(GameState.max_player_hp) + "  |  Score: " + str(GameState.score) + "  |  High Score: " + str(top_score) + "  |  Level: " + str(GameState.level)
 
 
-func log_message(message, color = Color("#F1F1E3")):
+func log_message(message, color = DesignSystem.COLOR_TEXT_PRIMARY):
 	message_history.append({ "text": message, "color": color })
 	if message_history.size() > 10:
 		message_history.pop_front()
