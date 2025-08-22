@@ -165,6 +165,8 @@ func try_move(dx, dy):
 				hud.get_node("ActionsLabel").hide()
 		
 		if target_tile_type == GlobalEnums.TileType.STAIRS:
+			$Timer.stop()
+			GameState.is_flickering = false
 			if GameState.light_durability > 0 and GameState.light_durability < 10:
 				GameState.light_durability += 10
 			transitioning = true
