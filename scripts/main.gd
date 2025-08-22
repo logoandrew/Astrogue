@@ -18,10 +18,12 @@ var game_over = false
 func _ready():
 	# 1. Initialize actors
 	player = {
-		"x": -1, "y": -1, "hp": GameState.player_hp,
-		"char": map.player_stats.char, "color": map.player_stats.color, "accuracy": map.player_stats.accuracy
+		"x": -1, "y": -1, "hp": map.player_stats.hp,
+		"char": map.player_stats.char, "color": map.player_stats.color, "accuracy": map.player_stats.accuracy, "damage": map.player_stats.damage
 	}
 	actors.append(player)
+	GameState.player_hp = map.player_stats.hp
+	GameState.max_player_hp = map.player_stats.hp
 	
 	# 2. Spawn actors and items on the map
 	map.spawn_actors_and_items(actors)
