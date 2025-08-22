@@ -15,7 +15,6 @@ metadata/_custom_type_script = "uid://dj88afc5sj20n"
 [resource]
 script = ExtResource("1_3tmof")
 char = "*"
-color = Color(1, 1, 1, 1)
 color_name = "COLOR_TILE_LIGHT"
 is_item = true
 pickup_method = "auto"

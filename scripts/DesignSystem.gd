@@ -4,7 +4,7 @@ extends Node
 const COLOR_NEAR_BLACK = Color("#140716")
 const COLOR_PRIMARY = Color("#210d21")
 const COLOR_SECONDARY = Color("#b500e7")
-const COLOR_SUCCESS = Color("#2e701e") #21B63E
+const COLOR_SUCCESS = Color("#2e701e")
 const COLOR_DANGER = Color("#d90e33")
 const COLOR_TEXT_PRIMARY = Color("#f1f1e3")
 const COLOR_TEXT_SECONDARY = Color("#b4aca6")

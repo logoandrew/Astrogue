@@ -1,6 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://l067fnf35t7p"]
+[gd_scene load_steps=8 format=3 uid="uid://l067fnf35t7p"]
 
 [ext_resource type="Script" uid="uid://6r6ywfsid7cp" path="res://scripts/TitleScreen.gd" id="1_4l16e"]
+[ext_resource type="Texture2D" uid="uid://cqng06asm0lab" path="res://assets/images/splash@2x.png" id="2_66w26"]
 [ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://assets/fonts/ShareTechMono-Regular.ttf" id="2_85feu"]
 [ext_resource type="FontFile" uid="uid://bice5em53eool" path="res://assets/fonts/SpaceMono-Italic.ttf" id="3_66w26"]
 [ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://assets/fonts/SpaceMono-BoldItalic.ttf" id="4_3ej01"]
@@ -24,14 +25,26 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_4l16e")
 
+[node name="BackgroundImage" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_66w26")
+expand_mode = 3
+stretch_mode = 6
+
 [node name="Label" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -44.5
-offset_right = 44.5
-offset_bottom = 23.0
+offset_left = -116.5
+offset_top = 30.0
+offset_right = 116.5
+offset_bottom = 85.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(0.945098, 0.945098, 0.890196, 1)
 theme_override_fonts/font = ExtResource("2_85feu")
@@ -53,25 +66,30 @@ offset_right = 55.0
 offset_bottom = 68.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 16
+alignment = 1
 
 [node name="StartGame" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_85feu")
-text = "Start Game"
+text = " Start Game "
 
 [node name="Instructions" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_85feu")
-text = "Instructions"
+text = " Instructions "
 
 [node name="HighScoreList" type="Button" parent="VBoxContainer"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("2_85feu")
-text = "High Scores"
+text = " High Scores "
 
 [node name="InstructionsPanel" type="Panel" parent="."]
 visible = false
-custom_minimum_size = Vector2(450, 320)
+custom_minimum_size = Vector2(450, 280)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -95,7 +113,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="InstructionsPanel/VBoxContainer"]
-custom_minimum_size = Vector2(0, 300)
+custom_minimum_size = Vector2(0, 260)
 layout_mode = 2
 theme_override_constants/line_separation = 6
 theme_override_fonts/normal_font = ExtResource("2_85feu")
@@ -129,9 +147,9 @@ INVENTORY: Collect crystals [b][*][/b] by moving onto their tile. Manage your co
 
 EQUIPPING:
 
-[i]GLOW SLOT[/i]: Your suit is equipped with a Geo-Luminescent Output Waveguide (GLOW) unit. Equip a crystal to activate your light. The crystal's energy will drain with every step you take.
+GLOW SLOT: Your suit is equipped with a Geo-Luminescent Output Waveguide (GLOW) unit. Equip a crystal to activate your light. The crystal's energy will drain with every step you take.
 
-[i]MELEE SLOT[/i]: Equip a crystal to overcharge your melee actuators, granting a significant damage bonus. This charge is unstable and will burn out after a few attack attempts.
+MELEE SLOT: Equip a crystal to overcharge your melee actuators, granting a significant damage bonus. This charge is unstable and will burn out after a few attack attempts.
 
 Be warned: All crystals are finite and will be destroyed when their energy is depleted. Manage them wisely.
 
@@ -148,7 +166,7 @@ text = "Back"
 
 [node name="HighScoresPanel" type="Panel" parent="."]
 visible = false
-custom_minimum_size = Vector2(300, 320)
+custom_minimum_size = Vector2(300, 280)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
