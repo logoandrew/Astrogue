@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://72p55jbchb73"]
+[gd_scene load_steps=11 format=3 uid="uid://72p55jbchb73"]
 
 [ext_resource type="Script" uid="uid://b18fhm2mhgba" path="res://scripts/HUD.gd" id="1_f6qnu"]
 [ext_resource type="FontFile" uid="uid://baxrq1x64p2ip" path="res://assets/fonts/ShareTechMono-Regular.ttf" id="2_k4w17"]
@@ -6,9 +6,6 @@
 [ext_resource type="FontFile" uid="uid://c3yofokgft3jw" path="res://assets/fonts/SpaceMono-BoldItalic.ttf" id="4_8cuoo"]
 [ext_resource type="FontFile" uid="uid://dr45t2n75w68l" path="res://assets/fonts/SpaceMono-Bold.ttf" id="5_cf6ij"]
 [ext_resource type="Script" uid="uid://momyt4c4d30h" path="res://scripts/MiniMapDisplay.gd" id="6_meimr"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rve7n"]
-bg_color = Color(0.129412, 0.713726, 0.243137, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_f6qnu"]
 bg_color = Color(0.129412, 0.0509804, 0.129412, 1)
@@ -89,7 +86,6 @@ anchor_right = 1.0
 offset_bottom = 27.0
 grow_horizontal = 2
 scale = Vector2(1, 0.4)
-theme_override_styles/fill = SubResource("StyleBoxFlat_rve7n")
 show_percentage = false
 
 [node name="MiniMapBG" type="ColorRect" parent="."]

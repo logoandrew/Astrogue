@@ -30,6 +30,10 @@ func _ready():
 	GameState.score_changed.connect(_on_score_changed)
 	_on_hp_changed(GameState.player_hp, GameState.max_player_hp)
 	
+	var healthbar_fill_style = StyleBoxFlat.new()
+	healthbar_fill_style.bg_color = DesignSystem.COLOR_SUCCESS
+	health_bar.add_theme_stylebox_override("fill", healthbar_fill_style)
+	
 	equipped_stylebox.bg_color = DesignSystem.COLOR_SUCCESS
 	equipped_stylebox.set_corner_radius_all(DesignSystem.SIZE_2XS)
 	default_stylebox = glow_equip_btn.get_theme_stylebox("normal")
