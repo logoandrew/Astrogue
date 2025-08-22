@@ -11,6 +11,7 @@ config_version=5
 [application]
 
 config/name="Astroque"
+config/description="Astrogue is a traditional roguelike set in a dark, procedurally generated alien hive. As the last operative of a doomed mission, you must descend through claustrophobic corridors, battling xenoforms with your melee unit. Manage your finite light source, scavenge what you can from the fallen, and see how long you can survive in the oppressive darkness."
 config/version="0.1.0"
 run/main_scene="uid://l067fnf35t7p"
 config/features=PackedStringArray("4.4", "GL Compatibility")
